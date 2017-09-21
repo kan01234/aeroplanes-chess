@@ -7,22 +7,23 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import com.aeroplanechess.service.GameService;
 
 @Component
-public class StompSubscribeEventListener implements ApplicationListener<SessionSubscribeEvent> {
+public class StompDisconnectedEventListener implements ApplicationListener<SessionDisconnectEvent> {
 
-	private static final Logger logger = LoggerFactory.getLogger(StompSubscribeEventListener.class);
+	private static final Logger logger = LoggerFactory.getLogger(StompDisconnectedEventListener.class);
 
 	@Autowired
 	@Lazy
 	GameService gameService;
 
 	@Override
-	public void onApplicationEvent(SessionSubscribeEvent sessionSubscribeEvent) {
-		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(sessionSubscribeEvent.getMessage());
+	public void onApplicationEvent(SessionDisconnectEvent sessionDisconnectEvent) {
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(sessionDisconnectEvent.getMessage());
 		logger.info(headerAccessor.toString());
+		gameService.removePlayer(headerAccessor.getSessionId());
 	}
 }

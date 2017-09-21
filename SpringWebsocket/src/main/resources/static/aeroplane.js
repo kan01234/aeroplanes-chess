@@ -43,8 +43,7 @@ function connect() {
 		stompClient.subscribe("/game/move-" + sessionId, function(res) {
 			console.log(res.body);
 			logAppend("pls select a aeroplane to move");
-			$(".aeroplane-btn").prop("disabled", false);
-			$(".aeroplane-btn").one("click", function() {
+			$(".aeroplane-btn").prop("disabled", false).off("click").one("click", function() {
 				disableBtn();
 				stompClient.send("/app/move/" + (Number($(this).html()) - 1));
 			});

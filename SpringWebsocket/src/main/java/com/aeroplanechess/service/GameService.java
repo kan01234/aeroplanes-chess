@@ -1,6 +1,6 @@
 package com.aeroplanechess.service;
 
-import javax.annotation.PostConstruct;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,13 +51,14 @@ public class GameService {
 		simpMessagingTemplate.convertAndSend("/game/move-" + sessionId, objectNode);
 	}
 
-	@PostConstruct
-	public String newGame() {
+	public void newGame() {
 		game = gameBuilder.build();
-		return "done";
+		// TODO return game id?
 	}
 
 	public void addPlayer(String sessionId) {
+		if (game == null)
+			newGame();
 		Player player;
 		Player[] players = game.getPlayers();
 		for (int i = 0; i < players.length; i++) {
@@ -76,10 +77,24 @@ public class GameService {
 		simpMessagingTemplate.convertAndSend("/game/player-list", game.getPlayers());
 	}
 
+	public void removePlayer(String sessionId) {
+		Player[] players = game.getPlayers();
+		for (int i = 0; i < players.length; i++) {
+			if (players[i] == null)
+				continue;
+			if (players[i].getSessionId().equals(sessionId)) {
+				players[i] = null;
+				break;
+			}
+		}
+		game.setPlayers(players);
+		simpMessagingTemplate.convertAndSend("/game/player-list", game.getPlayers());
+	}
+
 	public void checkStart() {
+		logger.info("check start");
 		if (!game.getReady())
 			return;
-		// TODO init the game here?
 		ObjectNode objectNode = objectMapper.createObjectNode();
 		objectNode.put("start", true);
 		simpMessagingTemplate.convertAndSend("/game/start", objectNode);
@@ -102,26 +117,32 @@ public class GameService {
 	}
 
 	public void move(String sessionId, int aeroplaneIndex) {
+		logger.info(game.getCurrentPlayer() + "moved");
 		int startIndex = game.getCurrentPlayer() * 4;
-		int winCount = 0;
 		Aeroplane[] aeroplanes = moveUtils.move(game.getAeroplanes(), aeroplaneIndex + startIndex,
 				game.getLastRoll());
-		// TODO checkwin
-		for (int i = startIndex; i < startIndex + 4; i++) {
-			if (aeroplanes[i].getInCellId().substring(0, 2).equals("go"))
-				winCount++;
-			else
-				break;
-		}
+		logger.info(Arrays.toString(game.getAeroplanes()));
 		simpMessagingTemplate.convertAndSend("/game/move-result", aeroplanes);
-		// TODO review game rules here?
-		if (winCount == 4) {
+		if (isWin()) {
 			ObjectNode objectNode = objectMapper.createObjectNode();
 			objectNode.put("playerWon", game.getCurrentPlayer());
 			simpMessagingTemplate.convertAndSend("/game/won", objectNode);
 		} else {
+			// TODO review game rules here?
 			nextTurn();
 		}
+	}
+
+	boolean isWin() {
+		Aeroplane[] aeroplanes = game.getAeroplanes();
+		int count = 0;
+		for (int i = game.getCurrentPlayer() * 4; i < i + 4; i++) {
+			if (aeroplanes[i].getInCellId().substring(0, 2).equals("go"))
+				count++;
+			else
+				break;
+		}
+		return count == 4;
 	}
 
 }

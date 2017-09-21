@@ -32,11 +32,11 @@ public class GameBuilder {
 			aeroplanes[i] = aeroplane;
 		}
 
-		for (int i = 0; i < 4; i++) {
-			aeroplane = aeroplanes[i];
-			aeroplane.setInCellId("ld0");
-			aeroplanes[i] = aeroplane;
-		}
+		// for (int i = 0; i < 4; i++) {
+		// aeroplane = aeroplanes[i];
+		// aeroplane.setInCellId("ld0");
+		// aeroplanes[i] = aeroplane;
+		// }
 
 		game.setAeroplanes(aeroplanes);
 	}

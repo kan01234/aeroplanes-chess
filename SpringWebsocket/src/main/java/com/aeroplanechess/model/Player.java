@@ -30,4 +30,9 @@ public class Player {
 		this.sessionId = sessionId;
 	}
 
+	@Override
+	public String toString() {
+		return "Player [name=" + name + ", color=" + color + ", sessionId=" + sessionId + "]";
+	}
+
 }

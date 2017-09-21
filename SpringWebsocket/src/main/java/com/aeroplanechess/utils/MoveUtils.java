@@ -11,6 +11,7 @@ public class MoveUtils {
 		String destPrefix = cellId.substring(0, 2);
 		int destNum = Integer.parseInt(cellId.substring(2));
 
+		// teleport from base to takeoff
 		switch (destPrefix) {
 		case "ba":
 			if (rollResult % 2 == 0) {
@@ -28,8 +29,9 @@ public class MoveUtils {
 			break;
 		}
 
+		// walk
 		while (rollResult > 0) {
-			if (destPrefix.equals("sk") && destNum == color * 13) {
+			if (destPrefix.equals("sk") && isTurn(destNum, color)) {
 				destPrefix = "ld";
 				destNum = color * 5;
 			} else {
@@ -39,12 +41,13 @@ public class MoveUtils {
 			rollResult--;
 		}
 
-		// TODO add jump
-		if (destNum % 4 == color) {
+		// jump
+		if (destPrefix.equals("sk") && destNum % 4 == color && !isTurn(destNum, color)) {
 			destNum += 4;
 			destNum %= 52;
 		}
 
+		// to goal
 		if (destPrefix.equals("ld")) {
 			if (destNum == (color + 1) * 5) {
 				destPrefix = "go";
@@ -57,6 +60,10 @@ public class MoveUtils {
 		aeroplane.setInCellId(destPrefix + destNum);
 		aeroplanes[index] = aeroplane;
 		return aeroplanes;
+	}
+
+	boolean isTurn(int cellNum, int color) {
+		return cellNum == color * 13;
 	}
 
 }
