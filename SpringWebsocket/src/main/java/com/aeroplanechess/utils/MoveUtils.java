@@ -1,5 +1,6 @@
 package com.aeroplanechess.utils;
 
+import com.aeroplanechess.enums.CellPrefix;
 import com.aeroplanechess.model.Aeroplane;
 
 public class MoveUtils {
@@ -12,27 +13,22 @@ public class MoveUtils {
 		int destNum = Integer.parseInt(cellId.substring(2));
 
 		// teleport from base to takeoff
-		switch (destPrefix) {
-		case "ba":
+		if (destPrefix.equals(CellPrefix.Base.getPrefix())) {
 			if (rollResult % 2 == 0) {
-				destPrefix = "to";
+				destPrefix = CellPrefix.TakeOff.getPrefix();
 				destNum = color;
 			}
 			rollResult = 0;
-			break;
-		case "to":
-			destPrefix = "sk";
+		} else if (destPrefix.equals(CellPrefix.TakeOff.getPrefix())) {
+			destPrefix = CellPrefix.Sky.getPrefix();
 			destNum = (color * 13 + 3);
 			rollResult--;
-			break;
-		default:
-			break;
 		}
 
 		// walk
 		while (rollResult > 0) {
-			if (destPrefix.equals("sk") && isTurn(destNum, color)) {
-				destPrefix = "ld";
+			if (destPrefix.equals(CellPrefix.Sky.getPrefix()) && isTurn(destNum, color)) {
+				destPrefix = CellPrefix.Landing.getPrefix();
 				destNum = color * 5;
 			} else {
 				destNum += 1;
@@ -42,15 +38,15 @@ public class MoveUtils {
 		}
 
 		// jump
-		if (destPrefix.equals("sk") && destNum % 4 == color && !isTurn(destNum, color)) {
+		if (destPrefix.equals(CellPrefix.Sky.getPrefix()) && destNum % 4 == color && !isTurn(destNum, color)) {
 			destNum += 4;
 			destNum %= 52;
 		}
 
 		// to goal
-		if (destPrefix.equals("ld")) {
+		if (destPrefix.equals(CellPrefix.Landing.getPrefix())) {
 			if (destNum == (color + 1) * 5) {
-				destPrefix = "go";
+				destPrefix = CellPrefix.Goal.getPrefix();
 				destNum = 0;
 			} else if (destNum > (color + 1) * 5) {
 				destNum = destNum - (destNum - (color + 1) * 5) * 2;
@@ -61,6 +57,7 @@ public class MoveUtils {
 		aeroplanes[index] = aeroplane;
 		return aeroplanes;
 	}
+
 
 	boolean isTurn(int cellNum, int color) {
 		return cellNum == color * 13;
