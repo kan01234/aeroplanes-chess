@@ -1,1 +1,1 @@
-# aeroplanes-chess
+# Aeroplanes Chess

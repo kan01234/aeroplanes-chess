@@ -1,0 +1,228 @@
+html {
+	background-color: #3e81e7b3;
+	border-top: 8px solid #1520ffb3;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+}
+
+#title {
+	background: white;
+	border-bottom: 2px dotted #1520ffb3;
+	color: #1520ffb3;
+	margin-top: 0;
+	padding: 15px;
+	text-align: center;
+	width: inherit;
+}
+
+#background, #background-mask {
+	background-image: url('/image/background2.jpg');
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	height: calc(100% - 8px);
+	-webkit-filter: blur(5px);
+	-moz-filter: blur(5px);
+	-o-filter: blur(5px);
+	-ms-filter: blur(5px);
+	filter: blur(5px);
+	position: absolute;
+	top: 8px;
+	width: 100%;
+	z-index: -1;
+}
+
+#background-mask {
+	background: #808080cc;
+}
+
+.wrapper {
+	margin: 0 auto;
+	position: relative;
+	width: 1100px;
+}
+
+.wrapper-options, .wrapper-message {
+	border: 1px dotted #1520ffb3;
+	box-sizing: border-box;
+	display: inline-block;
+	height: 676px;
+	margin-left: 15px;
+	vertical-align: top;
+	width: 225px;
+}
+
+.wrapper-options {
+	background: #ffffff1a;
+}
+
+.wrapper-message {
+	border: none;
+	line-height: 1.5;
+}
+
+.wrapper-system, .wrapper-chat {
+	border: 1px dotted #1520ffb3;
+	box-sizing: border-box;
+	overflow-y: auto;
+	overflow-x: hidden;
+	width: inherit;
+	overflow-x: hidden;
+}
+
+.wrapper-system {
+	background: #87c4f8b3;
+	height: 30%;
+	margin-bottom: 20px;
+	height: 30%;
+}
+
+.wrapper-chat {
+	border: none;
+	height: 67%;
+}
+
+.wrapper-options>div {
+	height: 50px;
+	vertical-align: top;
+}
+
+.wrapper-options input {
+	height: 100%;
+	width: 100%;
+}
+
+.player-container {
+	height: 120px !important;
+}
+
+.info-container {
+	overflow: hidden;
+	padding: 15px;
+}
+
+.info-container>div {
+	float: left;
+	width: 50%;
+}
+
+.info-container>div:last-child {
+	text-align: right;
+}
+
+.info-turn {
+	color: red;
+	display: none;
+	font-weight: normal;
+}
+
+.chess-container {
+	padding: 15px;
+}
+
+.chess-container>input {
+	border: none;
+	cursor: pointer;
+	display: inline-block;
+	font-weight: bold;
+	height: 45px;
+	opacity: 0.3;
+	width: 45px;
+}
+
+.chess-container>input:hover {
+	cursor: pointer;
+	opacity: 0.5;
+}
+
+#dice {
+	color: #1520ffb3; font-size : 120px;
+	height: auto;
+	text-align: center;
+	font-size: 120px;
+}
+
+#count {
+	font-size: 30px;
+	left: 295px;
+	position: absolute;
+	top: 290px;
+}
+
+#roll {
+	background: #1520ffb3;
+	border: 1px solid #1520ffb3;
+	box-shadow: 1px 1px 32px #888888;
+	color: white;
+}
+
+#roll:hover {
+	background: #1520ffcc;
+	cursor: pointer;
+}
+
+#roll:disabled:hover {
+	background: #1520ffb3;
+	cursor: pointer;
+}
+
+/* chess color */
+#p1 .chess-container input {
+	background-color: yellow;
+}
+
+#p2 .chess-container input {
+	background-color: blue;
+}
+
+#p3 .chess-container input {
+	background-color: green;
+}
+
+#p4 .chess-container input {
+	background-color: red;
+}
+
+/* info color */
+.info-container {
+	background-color: #ffffff80;
+	color: white;
+	font-weight: bold;
+}
+
+#p1 .info-container {
+	background: #ff03;
+	border-top: 1px solid yellow;
+	border-bottom: 1px solid yellow;
+	border-top: 1px solid yellow;
+}
+
+#p2 .info-container {
+	background: #0000ff4d;
+	border-top: 1px solid blue;
+	border-bottom: 1px solid blue;
+}
+
+#p3 .info-container {
+	background: #0080004d;
+	border-top: 1px solid green;
+	border-bottom: 1px solid green;
+}
+
+#p4 .info-container {
+	background: #f003;
+	border-top: 1px solid red;
+	border-bottom: 1px solid red;
+}
+
+#board {
+	display: inline-block;
+	margin: 0 auto;
+}
+
+#board-chess, #board-hover {
+	left: 0;
+	position: absolute;
+}
