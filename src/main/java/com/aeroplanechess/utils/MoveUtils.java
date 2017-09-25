@@ -5,8 +5,8 @@ import com.aeroplanechess.model.Aeroplane;
 
 public class MoveUtils {
 
-	public Aeroplane[] move(Aeroplane[] aeroplanes, int index, int rollResult) {
-		Aeroplane aeroplane = aeroplanes[index];
+	public Aeroplane[] move(Aeroplane[] aeroplanes, int aeroplaneIndex, int rollResult) {
+		Aeroplane aeroplane = aeroplanes[aeroplaneIndex];
 		int color = aeroplane.getColor();
 		String cellId = aeroplane.getInCellId();
 		String destPrefix = cellId.substring(0, 2);
@@ -54,7 +54,7 @@ public class MoveUtils {
 		}
 
 		aeroplane.setInCellId(destPrefix + destNum);
-		aeroplanes[index] = aeroplane;
+		aeroplanes[aeroplaneIndex] = aeroplane;
 		return aeroplanes;
 	}
 

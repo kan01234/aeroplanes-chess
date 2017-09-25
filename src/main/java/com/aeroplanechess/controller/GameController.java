@@ -6,6 +6,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.aeroplanechess.service.GameService;
 
@@ -16,8 +17,9 @@ public class GameController {
 	GameService gameService;
 
 	@RequestMapping("/new-game")
-	public void newGame() {
+	public @ResponseBody String newGame() {
 		gameService.newGame();
+		return "done";
 	}
 
 	@MessageMapping("/join")
