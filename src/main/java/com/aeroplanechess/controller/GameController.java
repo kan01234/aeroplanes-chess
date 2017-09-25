@@ -20,16 +20,6 @@ public class GameController {
 		gameService.newGame();
 	}
 
-	@RequestMapping("/game")
-	public String gameIndex(@Header("simpSessionId") String sessionId) {
-		return "game";
-	}
-	
-	@RequestMapping("/index")
-	public String gameIndex2(@Header("simpSessionId") String sessionId) {
-		return "index";
-	}
-
 	@MessageMapping("/join")
 	public void join(@Header("simpSessionId") String sessionId) {
 		gameService.addPlayer(sessionId);
