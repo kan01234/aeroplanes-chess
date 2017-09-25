@@ -8,6 +8,7 @@ public class Game {
 	Player[] players;
 	int lastRoll = -1;
 	int currentPlayer = -1;
+	int continued = 0;
 	boolean ready = false;
 	Aeroplane[] aeroplanes;
 
@@ -59,11 +60,18 @@ public class Game {
 		this.aeroplanes = aeroplanes;
 	}
 
+	public int getContinued() {
+		return continued;
+	}
+
+	public void setContinued(int continued) {
+		this.continued = continued;
+	}
+
 	@Override
 	public String toString() {
-		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll
-				+ ", currentPlayer=" + currentPlayer + ", ready=" + ready + ", aeroplanes="
-				+ Arrays.toString(aeroplanes) + "]";
+		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", currentPlayer=" + currentPlayer + ", continued=" + continued + ", ready=" + ready + ", aeroplanes=" + Arrays.toString(aeroplanes)
+				+ "]";
 	}
 
 }

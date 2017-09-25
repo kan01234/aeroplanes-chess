@@ -1,5 +1,8 @@
 package com.aeroplanechess.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +16,6 @@ import com.aeroplanechess.model.Player;
 import com.aeroplanechess.utils.DiceUtils;
 import com.aeroplanechess.utils.GameBuilder;
 import com.aeroplanechess.utils.MoveUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Service
 public class GameService {
@@ -22,13 +23,11 @@ public class GameService {
 	// TODO review here!
 	public static Game game;
 
-	private Logger logger = LoggerFactory.getLogger(GameService.class);
+	Logger logger = LoggerFactory.getLogger(GameService.class);
+	Map<String, Object> responseMap;
 
 	@Autowired
 	SimpMessagingTemplate simpMessagingTemplate;
-
-	@Autowired
-	ObjectMapper objectMapper;
 
 	@Autowired
 	GameBuilder gameBuilder;
@@ -40,14 +39,23 @@ public class GameService {
 	MoveUtils moveUtils;
 
 	public void roll(String sessionId) {
-		game.setLastRoll(diceUtils.roll());
-		ObjectNode objectNode = objectMapper.createObjectNode();
-		objectNode.put("roll", game.getLastRoll());
-		objectNode.put("current", game.getCurrentPlayer());
-		simpMessagingTemplate.convertAndSend("/game/roll-result", objectNode);
-		objectNode = objectMapper.createObjectNode();
-		objectNode.put("move", "true");
-		simpMessagingTemplate.convertAndSend("/game/move-" + sessionId, objectNode);
+		int rollResult = diceUtils.roll();
+		responseMap = new HashMap<String, Object>();
+
+		// send roll result to all players
+		game.setLastRoll(rollResult);
+		responseMap.put("roll", game.getLastRoll());
+		responseMap.put("current", game.getCurrentPlayer());
+		simpMessagingTemplate.convertAndSend("/game/roll-result", responseMap);
+
+		// send move notification to current player
+		if (rollResult == 6 && game.getContinued() == 2) {
+			thridSix();
+		} else {
+			responseMap = new HashMap<String, Object>();
+			responseMap.put("move", true);
+			simpMessagingTemplate.convertAndSend("/game/move-" + sessionId, responseMap);
+		}
 	}
 
 	public void newGame() {
@@ -93,37 +101,55 @@ public class GameService {
 	public void checkStart() {
 		if (!game.getReady())
 			return;
-		ObjectNode objectNode = objectMapper.createObjectNode();
-		objectNode.put("start", true);
-		simpMessagingTemplate.convertAndSend("/game/start", objectNode);
+		responseMap = new HashMap<String, Object>();
+		responseMap.put("start", true);
+		simpMessagingTemplate.convertAndSend("/game/start", responseMap);
+		nextTurn(false);
+	}
+
+	public void move(String sessionId, int aeroplaneIndex) {
+		// TODO add crash handle?
+		int rollResult = game.getLastRoll();
+		Aeroplane[] aeroplanes = game.getAeroplanes();
+		responseMap = new HashMap<String, Object>();
+
+		// move
+		aeroplanes = moveUtils.move(aeroplanes, game.getCurrentPlayer() * 4 + aeroplaneIndex, rollResult);
+		game.setAeroplanes(aeroplanes);
+		responseMap.put("aeroplanes", aeroplanes);
+		simpMessagingTemplate.convertAndSend("/game/move-result", responseMap);
+
+		// check win
+		if (isWin()) {
+			responseMap = new HashMap<String, Object>();
+			responseMap.put("playerWon", game.getCurrentPlayer());
+			simpMessagingTemplate.convertAndSend("/game/won", responseMap);
+		} else {
+			nextTurn(rollResult == 6);
+		}
+	}
+
+	void thridSix() {
+		responseMap = new HashMap<String, Object>();
+		Aeroplane[] aeroplanes = moveUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayer());
+		game.setAeroplanes(aeroplanes);
+		responseMap.put("aeroplanes", aeroplanes);
+		responseMap.put("thrid-six", true);
+		simpMessagingTemplate.convertAndSend("/game/move-result", responseMap);
 		nextTurn(false);
 	}
 
 	void nextTurn(boolean isContinue) {
-
-		if (!isContinue)
+		if (!isContinue) {
 			game.setCurrentPlayer((game.getCurrentPlayer() + 1) % 4);
-
-		ObjectNode objectNode = objectMapper.createObjectNode();
-		objectNode.put("your-turn", true);
-		simpMessagingTemplate.convertAndSend(
-				"/game/your-turn-" + game.getPlayers()[game.getCurrentPlayer()].getSessionId(),
-				objectNode);
-	}
-
-	public void move(String sessionId, int aeroplaneIndex) {
-		int startIndex = game.getCurrentPlayer() * 4;
-		int rollResult = game.getLastRoll();
-		Aeroplane[] aeroplanes = moveUtils.move(game.getAeroplanes(), aeroplaneIndex + startIndex, rollResult);
-		simpMessagingTemplate.convertAndSend("/game/move-result", aeroplanes);
-		if (isWin()) {
-			ObjectNode objectNode = objectMapper.createObjectNode();
-			objectNode.put("playerWon", game.getCurrentPlayer());
-			simpMessagingTemplate.convertAndSend("/game/won", objectNode);
+			game.setContinued(0);
 		} else {
-			// TODO review game rules here?
-			nextTurn(rollResult == 6);
+			game.setContinued(game.getContinued() + 1);
 		}
+
+		responseMap = new HashMap<String, Object>();
+		responseMap.put("your-turn", true);
+		simpMessagingTemplate.convertAndSend("/game/your-turn-" + game.getPlayers()[game.getCurrentPlayer()].getSessionId(), responseMap);
 	}
 
 	boolean isWin() {

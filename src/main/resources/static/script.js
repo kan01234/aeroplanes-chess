@@ -122,6 +122,7 @@ window.addEventListener('load', function() {
 			var body = JSON.parse(res.body);
 			if (index === (body.current + 1)) {
 				appendSystemMessage(`You: \t roll ${body.roll}`);
+				// TODO change to subscribe /game/move-${sessionId}
 				appendSystemMessage('Choose a chess to move!', system_alert_color);
 			} else {
 				appendSystemMessage(`Player ${body.current + 1}: \t roll ${body.roll}`);
@@ -152,7 +153,7 @@ window.addEventListener('load', function() {
 				if(!document.getElementById('roll').disabled)
 					document.getElementById('roll').click();
 			})
-			var aeroplanes = JSON.parse(res.body);
+			var aeroplanes = JSON.parse(res.body).aeroplanes;
 			var colorCount = -1;
 			var player, player_flow, player_chess, player_pos;
 			ctx_top.font = 'bold 30px Arial';

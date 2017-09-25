@@ -58,9 +58,15 @@ public class MoveUtils {
 		return aeroplanes;
 	}
 
-
 	boolean isTurn(int cellNum, int color) {
 		return cellNum == color * 13;
+	}
+
+	public Aeroplane[] allBackToBase(Aeroplane[] aeroplanes, int playerIndex) {
+		int start = playerIndex * 4;
+		for (int i = start; i < start + 4; i++)
+			aeroplanes[i].setInCellId(CellPrefix.Base.getPrefix() + playerIndex);
+		return aeroplanes;
 	}
 
 }
