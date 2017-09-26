@@ -1,10 +1,13 @@
 html {
 	background-color: #3e81e7b3;
 	border-top: 8px solid #1520ffb3;
+	box-sizing: border-box;
+	height: 100vh;
 }
 
 body {
 	margin: 0;
+	height: inherit;
 	padding: 0;
 }
 
@@ -119,7 +122,8 @@ body {
 }
 
 .chess-container {
-	padding: 15px;
+	padding: 10px 0 0;
+	text-align: center;
 }
 
 .chess-container>input {
