@@ -108,7 +108,6 @@ public class GameService {
 	}
 
 	public void move(String sessionId, int aeroplaneIndex) {
-		// TODO add crash handle?
 		int rollResult = game.getLastRoll();
 		Aeroplane[] aeroplanes = game.getAeroplanes();
 		responseMap = new HashMap<String, Object>();

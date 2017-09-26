@@ -1,5 +1,8 @@
 package com.aeroplanechess.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.aeroplanechess.enums.CellPrefix;
 import com.aeroplanechess.model.Aeroplane;
 
@@ -11,6 +14,7 @@ public class MoveUtils {
 		String cellId = aeroplane.getInCellId();
 		String destPrefix = cellId.substring(0, 2);
 		int destNum = Integer.parseInt(cellId.substring(2));
+		List<Integer> encountered = new ArrayList<Integer>();
 
 		// teleport from base to takeoff
 		if (destPrefix.equals(CellPrefix.Base.getPrefix())) {
@@ -41,6 +45,32 @@ public class MoveUtils {
 		if (destPrefix.equals(CellPrefix.Sky.getPrefix()) && destNum % 4 == color && !isTurn(destNum, color)) {
 			destNum += 4;
 			destNum %= 52;
+		}
+
+		// TODO check eat, may change the return type?
+		for (int i = 0; i < color * 4; i++) {
+			if (aeroplanes[i].getInCellId().equals(destPrefix + destNum)) {
+				encountered.add(i);
+			}
+		}
+
+		for (int i = color * 4 + 4; i < aeroplanes.length; i++) {
+			if (aeroplanes[i].getInCellId().equals(destPrefix + destNum)) {
+				encountered.add(i);
+			}
+		}
+
+		// TODO review here
+		if (!encountered.isEmpty()) {
+			if (encountered.size() > 1) {
+				destPrefix = CellPrefix.Base.getPrefix();
+				destNum = color;
+			} else {
+				int i = encountered.get(0);
+				Aeroplane a = aeroplanes[i];
+				a.setInCellId(CellPrefix.Base.getPrefix() + a.getColor());
+				aeroplanes[i] = a;
+			}
 		}
 
 		// to goal
