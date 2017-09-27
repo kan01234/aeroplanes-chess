@@ -217,7 +217,7 @@ window.addEventListener('load', function() {
 			elementlDisabled('roll', false);
 		});
 
-		stompClient.send("/app/join");
+		stompClient.send("/app/join/");
 	});
 	
 	/* board */

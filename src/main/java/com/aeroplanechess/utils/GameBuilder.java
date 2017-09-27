@@ -1,5 +1,7 @@
 package com.aeroplanechess.utils;
 
+import java.util.UUID;
+
 import com.aeroplanechess.model.Aeroplane;
 import com.aeroplanechess.model.Game;
 import com.aeroplanechess.model.Player;
@@ -10,6 +12,7 @@ public class GameBuilder {
 
 	public Game build() {
 		game = new Game();
+		game.setId(UUID.randomUUID().toString());
 		initPlayers();
 		initAeroPlane();
 		return game;
