@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.aeroplanechess.model.Game;
-import com.aeroplanechess.service.MessageResponseService;
 import com.aeroplanechess.utils.DiceUtils;
 import com.aeroplanechess.utils.GameBuilder;
 import com.aeroplanechess.utils.MoveUtils;
@@ -18,11 +17,6 @@ public class AppConfig {
 	@Bean(name = "playerGameMap")
 	public Map<String, String> getPlayerGameMap() {
 		return new HashMap<String, String>();
-	}
-
-	@Bean
-	public MessageResponseService getMessageResponseService() {
-		return new MessageResponseService();
 	}
 
 	@Bean(name = "playingGame")

@@ -18,11 +18,11 @@ import com.aeroplanechess.utils.MoveUtils;
 @Service
 public class GameService {
 
-	// TODO review here!
+	// TODO move to redis ?
 	@Autowired
 	Map<String, Game> waitingGames;
 
-	// TODO review here!
+	// TODO move to redis ?
 	@Autowired
 	Map<String, Game> playingGames;
 
@@ -31,11 +31,8 @@ public class GameService {
 
 	Logger logger = LoggerFactory.getLogger(GameService.class);
 
-	// TODO build in another class?
-	Map<String, Object> responseMap;
-
 	@Autowired
-	MessageResponseService messageResponseService;
+	MessagingService messagingService;
 
 	@Autowired
 	GameBuilder gameBuilder;
@@ -47,51 +44,36 @@ public class GameService {
 	MoveUtils moveUtils;
 
 	public void roll(String sessionId, String gameId) {
-		if (!playingGames.containsKey(gameId)) {
-			// TODO send error here?
+		if (!isPlayingGame(gameId))
 			return;
-		}
 
 		Game game = playingGames.get(gameId);
 		int rollResult = diceUtils.roll();
-		// responseMap = new HashMap<String, Object>();
 
 		// send roll result to all players
 		game.setLastRoll(rollResult);
-		// responseMap.put("roll", game.getLastRoll());
-		// responseMap.put("current", game.getCurrentPlayer());
-		// // simpMessagingTemplate.convertAndSend("/game/roll-result", responseMap);
-		messageResponseService.send("roll-result", game.getId(), new String[] { "roll", "current" }, new Object[] { rollResult, game.getCurrentPlayer() });
+		messagingService.send("roll-result", game.getId(), new String[] { "roll", "current" }, new Object[] { rollResult, game.getCurrentPlayer() });
 
 		// send move notification to current player
 		if (rollResult == 6 && game.getContinued() == 2) {
 			thridSix(game);
 		} else {
-			// responseMap = new HashMap<String, Object>();
-			// responseMap.put("move", true);
-			// simpMessagingTemplate.convertAndSend("/game/move-" + sessionId, responseMap);
-			messageResponseService.sendTo("move", sessionId, gameId, "move", true);
+			messagingService.sendTo("move", sessionId, gameId, "move", true);
 		}
 	}
-
-	// public void newGame() {
-	// game = gameBuilder.build();
-	// // TODO return game id?
-	// }
 
 	public void addPlayer(String sessionId) {
 		addPlayer(sessionId, waitingGames.isEmpty() ? gameBuilder.build() : waitingGames.get(waitingGames.keySet().iterator().next()));
 	}
 
 	public void addPlayer(String sessionId, String gameId) {
-		if (waitingGames.containsKey(gameId)) {
-			addPlayer(sessionId, waitingGames.get(gameId));
-		} else {
-			// TODO send error here ?
-		}
+		addPlayer(sessionId, waitingGames.containsKey(gameId) ? waitingGames.get(gameId) : null);
 	}
 
 	void addPlayer(String sessionId, Game game) {
+		if (game == null)
+			messagingService.sendTo("joined", sessionId, new String[] { "error", "message" }, new Object[] { true, "game id not found" });
+
 		Player[] players = game.getPlayers();
 		boolean added = false;
 		for (int i = 0; i < players.length; i++) {
@@ -110,11 +92,8 @@ public class GameService {
 		if (added) {
 			game.setPlayers(players);
 			checkStart(game);
-			// simpMessagingTemplate.convertAndSend("/game/player-list", game.getPlayers());
-			messageResponseService.send("player-list", game.getId(), "players", players);
-		} else {
-			// TODO send game is full
-			logger.info("the game is full");
+			messagingService.sendTo("joined", sessionId, new String[] { "error", "game-id" }, new Object[] { false, game.getId() });
+			messagingService.send("player-list", game.getId(), "players", players);
 		}
 	}
 
@@ -145,8 +124,7 @@ public class GameService {
 			waitingGames.put(game.getId(), game);
 		else
 			playingGames.put(game.getId(), game);
-		// simpMessagingTemplate.convertAndSend("/game/player-list", game.getPlayers());
-		messageResponseService.send("player-list", game.getId(), "players", players);
+		messagingService.send("player-list", game.getId(), "players", players);
 	}
 
 	void checkStart(Game game) {
@@ -154,57 +132,38 @@ public class GameService {
 			waitingGames.put(game.getId(), game);
 			return;
 		}
-
 		String gameId = game.getId();
 		waitingGames.remove(gameId);
 		playingGames.put(gameId, game);
-
-		// responseMap = new HashMap<String, Object>();
-		// responseMap.put("start", true);
-		// simpMessagingTemplate.convertAndSend("/game/start", responseMap);
-		messageResponseService.send("start", gameId, "start", true);
-
+		messagingService.send("start", gameId, "start", true);
 		nextTurn(game, false);
 	}
 
 	public void move(String sessionId, String gameId, int aeroplaneIndex) {
-		if (!playingGames.containsKey(gameId)) {
-			// TODO send error here?
+		if (!isPlayingGame(gameId))
 			return;
-		}
+
 		Game game = playingGames.get(gameId);
 		int rollResult = game.getLastRoll();
 		int currentPlayer = game.getCurrentPlayer();
 		Aeroplane[] aeroplanes = game.getAeroplanes();
-		// responseMap = new HashMap<String, Object>();
-
 		// move
 		aeroplanes = moveUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
 		game.setAeroplanes(aeroplanes);
-		// responseMap.put("aeroplanes", aeroplanes);
-		// simpMessagingTemplate.convertAndSend("/game/move-result", responseMap);
-		messageResponseService.send("move-result", gameId, "aeroplanes", aeroplanes);
-
+		messagingService.send("move-result", gameId, "aeroplanes", aeroplanes);
 		// check win
 		if (isWin(aeroplanes, currentPlayer)) {
-			// responseMap = new HashMap<String, Object>();
-			// responseMap.put("playerWon", game.getCurrentPlayer());
-			// simpMessagingTemplate.convertAndSend("/game/won", responseMap);
-			// TODO remove game in playing game map?
-			messageResponseService.send("won", gameId, "player-won", currentPlayer);
+			playingGames.remove(gameId);
+			messagingService.send("won", gameId, "player-won", currentPlayer);
 		} else {
 			nextTurn(game, rollResult == 6);
 		}
 	}
 
 	void thridSix(Game game) {
-		// responseMap = new HashMap<String, Object>();
 		Aeroplane[] aeroplanes = moveUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayer());
 		game.setAeroplanes(aeroplanes);
-		// responseMap.put("aeroplanes", aeroplanes);
-		// responseMap.put("thrid-six", true);
-		// simpMessagingTemplate.convertAndSend("/game/move-result", responseMap);
-		messageResponseService.send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { aeroplanes, true });
+		messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { aeroplanes, true });
 		nextTurn(game, false);
 	}
 
@@ -217,11 +176,7 @@ public class GameService {
 		}
 
 		playingGames.put(game.getId(), game);
-
-//		responseMap = new HashMap<String, Object>();
-//		responseMap.put("your-turn", true);
-//		simpMessagingTemplate.convertAndSend("/game/your-turn-" + game.getPlayers()[game.getCurrentPlayer()].getSessionId(), responseMap);
-		messageResponseService.sendTo("your-turn", game.getPlayers()[game.getCurrentPlayer()].getSessionId(), game.getId(), "your-turn", true);
+		messagingService.sendTo("your-turn", game.getPlayers()[game.getCurrentPlayer()].getSessionId(), game.getId(), "your-turn", true);
 	}
 
 	boolean isWin(Aeroplane[] aeroplanes, int currentPlayer) {
@@ -233,6 +188,14 @@ public class GameService {
 				break;
 		}
 		return count == 4;
+	}
+
+	boolean isPlayingGame(String gameId) {
+		if (!playingGames.containsKey(gameId)) {
+			messagingService.send("error", gameId, "message", "game not foundin playing games list");
+			return false;
+		}
+		return true;
 	}
 
 }

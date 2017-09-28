@@ -24,7 +24,7 @@ function connect() {
 
 		stompClient.subscribe("/game/player-list", function(res) {
 			$(".player-list").html("");
-			var players = JSON.parse(res.body);
+			var players = JSON.parse(res.body).players;
 			for(var i in players) {
 				var player = players[i];
 				if(player == null) continue;

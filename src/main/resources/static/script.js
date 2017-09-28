@@ -103,8 +103,11 @@ window.addEventListener('load', function() {
 		sessionId = /\/([^\/]+)\/websocket/.exec(sockjs._transport.url)[1];
 		console.log("connected, session id: " + sessionId);
 
+		// TODO subscribe joined-${sessionId}
+		// TODO subscribe other game link after collect game id ?
+
 		stompClient.subscribe("/game/player-list", function(res) {
-			var players = JSON.parse(res.body);
+			var players = JSON.parse(res.body).players;
 			for(var i in players) {
 				var player = players[i];
 				if(player == null)
