@@ -81,6 +81,7 @@ var number_of_player = 4,
 
 var stompClient = null,
 	sessionId,
+	gameId,
 	diceInterval,
 	countDownInterval,
 	index,
@@ -88,13 +89,18 @@ var stompClient = null,
 	colors =	["yellow", "blue", "green", "red" ],
 	sockjs = new SockJS('/aeroplanechess-websocket');
 
+var board,
+	boardChess,
+	boardHover,
+	i;
+
 window.addEventListener('load', function() {
 	appendSystemMessage('Welcome!');
 
-	var board = document.getElementById("board"),
-		boardChess = document.getElementById('board-chess'),
-		boardHover = document.getElementById('board-hover'),
-		i;
+	board = document.getElementById("board");
+	boardChess = document.getElementById('board-chess');
+	boardHover = document.getElementById('board-hover');
+	i;
 	
 	/* socket */
 	stompClient = Stomp.over(sockjs);
@@ -103,124 +109,20 @@ window.addEventListener('load', function() {
 		sessionId = /\/([^\/]+)\/websocket/.exec(sockjs._transport.url)[1];
 		console.log("connected, session id: " + sessionId);
 
-		// TODO subscribe joined-${sessionId}
-		// TODO subscribe other game link after collect game id ?
+		// TODO subscribe /game/${gameId}/error
 
-		stompClient.subscribe("/game/player-list", function(res) {
-			var players = JSON.parse(res.body).players;
-			for(var i in players) {
-				var player = players[i];
-				if(player == null)
-					continue;
-				var name = player.name;
-				if(sessionId == player.sessionId) {
-					name += " (Me)";
-					index = Number(i) + 1;
-					document.getElementById(`p${index}-info-name`).innerHTML = 'You!';
-				}
+		stompClient.subscribe(`/game/joined-${sessionId}`, function(res) {
+			res = JSON.parse(res.body);
+			console.log(res);
+			if(res.error) {
+				// TODO show join game error here
+				return;
 			}
+			gameId = res["game-id"];
+			joined();
 		});
 
-		stompClient.subscribe("/game/roll-result", function(res) {
-			var body = JSON.parse(res.body);
-			if (index === (body.current + 1)) {
-				appendSystemMessage(`You: \t roll ${body.roll}`);
-				// TODO change to subscribe /game/move-${sessionId}
-				appendSystemMessage('Choose a chess to move!', system_alert_color);
-			} else {
-				appendSystemMessage(`Player ${body.current + 1}: \t roll ${body.roll}`);
-			}
-			clearInterval(diceInterval);
-			countDown(() => {
-				Array.from(document.getElementById(`p${index}`).getElementsByClassName('chess')).every((element) => {
-					if (!element.disaled) {
-						element.click();
-						return true;
-					}
-				})
-			})
-			dice.innerHTML = dices[Number(body.roll) - 1];
-		});
-
-		/*stompClient.subscribe("/game/move-" + sessionId, function(res) {
-			console.log("pls select a aeroplane to move");
-		});*/
-
-		stompClient.subscribe("/game/move-result", function(res) {
-			appendSystemMessage('System: \t Moved');
-			ctx_top = boardChess.getContext('2d');
-			ctx_top.clearRect(0, 0, boardChess.width, boardChess.height);
-			infoDisabled(true);
-			countDown(() => {
-				console.log(document.getElementById('roll'));
-				if(!document.getElementById('roll').disabled)
-					document.getElementById('roll').click();
-			})
-			var aeroplanes = JSON.parse(res.body).aeroplanes;
-			var colorCount = -1;
-			var player, player_flow, player_chess, player_pos;
-			ctx_top.font = 'bold 30px Arial';
-			for(var i = 0 in aeroplanes) {
-				player = this[`p${aeroplanes[i].color + 1}`];
-				ctx_top.beginPath();
-				ctx_top.strokeStyle = player.color || 'white';
-				ctx_top.fillStyle = player.color;
-				player_chess = document.getElementById(`p${aeroplanes[i].color + 1}-c${i - (aeroplanes[i].color * 4)}`);
-				if (aeroplanes[i].inCellId.indexOf(container_chess_goal_prefix) === 0) {
-					player_pos = container_chess_goal_prefix;
-					player_chess.style.background = 'grey';
-				} else if (aeroplanes[i].inCellId.indexOf(container_home_prefix) === 0) {
-					player_pos = `${container_home_prefix}${i - (aeroplanes[i].color * 4)}`;
-				} else {
-					player_pos = aeroplanes[i].inCellId;
-				}
-				player_flow = player.flow[player_pos];
-				player_chess.dataset.pos = player_pos;
-				ctx_top.fillText(i - (aeroplanes[i].color * 4) + 1, player_flow.x - common_distance, player_flow.y + common_distance);
-				ctx_top.strokeText(i - (aeroplanes[i].color * 4) + 1, player_flow.x - common_distance, player_flow.y + common_distance);
-			}
-			rollDice();
-		});
-
-		stompClient.subscribe("/game/start", function(res) {
-			appendSystemMessage('Game Start!', system_color);
-			var ctx_hover = boardHover.getContext('2d');
-			Array.from(document.getElementById(`p${index}`).getElementsByClassName('chess')).forEach((element) => {
-				element.addEventListener('click', () => {
-					stompClient.send("/app/move/" + (Number(element.value) - 1));
-					infoDisabled(true);
-					chessDisabled(true);
-				})
-			})
-			Array.from(document.getElementsByClassName('chess')).forEach((element) => {
-				element.addEventListener('mouseover', () => {
-					if (!element.dataset.pos || element.dataset.pos.indexOf(container_home_prefix) === 0)
-						return;
-					var player = this[element.id.substr(0, 2)],
-						pos = player.flow[element.dataset.pos];
-					ctx_hover.beginPath();
-					ctx_hover.fillStyle = player.color;
-					ctx_hover.arc(pos.x, pos.y, container_chess_common_radius, container_chess_common_startAngle, container_chess_common_endAngle);
-					ctx_hover.fill();
-				})
-				element.addEventListener('mouseout', () => {
-					ctx_hover.clearRect(0, 0, boardHover.width, boardHover.height);
-				})
-			})
-			countDown(() => {
-				if(!document.getElementById('roll').disabled)
-					document.getElementById('roll').click();
-			})
-			rollDice();
-		});
-
-		stompClient.subscribe("/game/your-turn-" + sessionId, function(res) {
-			appendSystemMessage('Your Turn!', system_alert_color);
-			infoDisabled(false);
-			elementlDisabled('roll', false);
-		});
-
-		stompClient.send("/app/join/");
+		stompClient.send("/app/join/null");
 	});
 	
 	/* board */
@@ -344,8 +246,126 @@ var drawCanvas = (canvas, canvas_top) => {
 	}
 }
 
+var joined = () => {
+	stompClient.subscribe(`/game/${gameId}/player-list`, function(res) {
+		var players = JSON.parse(res.body).players;
+		for(var i in players) {
+			var player = players[i];
+			if(player == null)
+				continue;
+			var name = player.name;
+			if(sessionId == player.sessionId) {
+				name += " (Me)";
+				index = Number(i) + 1;
+				document.getElementById(`p${index}-info-name`).innerHTML = 'You!';
+			}
+		}
+	});
+
+	stompClient.subscribe(`/game/${gameId}/roll-result`, function(res) {
+		var body = JSON.parse(res.body);
+		if (index === (body.current + 1)) {
+			appendSystemMessage(`You: \t roll ${body.roll}`);
+			// TODO change to subscribe /game/move-${sessionId}
+			appendSystemMessage('Choose a chess to move!', system_alert_color);
+		} else {
+			appendSystemMessage(`Player ${body.current + 1}: \t roll ${body.roll}`);
+		}
+		clearInterval(diceInterval);
+		countDown(() => {
+			console.log(index);
+			Array.from(document.getElementById(`p${index}`).getElementsByClassName('chess')).every((element) => {
+				if (!element.disaled) {
+					element.click();
+					return true;
+				}
+			})
+		})
+		dice.innerHTML = dices[Number(body.roll) - 1];
+	});
+
+	/*
+	 * stompClient.subscribe("/game/move-" + sessionId, function(res) {
+	 * console.log("pls select a aeroplane to move"); });
+	 */
+
+	stompClient.subscribe(`/game/${gameId}/move-result`, function(res) {
+		appendSystemMessage('System: \t Moved');
+		ctx_top = boardChess.getContext('2d');
+		ctx_top.clearRect(0, 0, boardChess.width, boardChess.height);
+		infoDisabled(true);
+		countDown(() => {
+			console.log(document.getElementById('roll'));
+			if(!document.getElementById('roll').disabled)
+				document.getElementById('roll').click();
+		})
+		var aeroplanes = JSON.parse(res.body).aeroplanes;
+		var colorCount = -1;
+		var player, player_flow, player_chess, player_pos;
+		ctx_top.font = 'bold 30px Arial';
+		for(var i = 0 in aeroplanes) {
+			player = this[`p${aeroplanes[i].color + 1}`];
+			ctx_top.beginPath();
+			ctx_top.strokeStyle = player.color || 'white';
+			ctx_top.fillStyle = player.color;
+			player_chess = document.getElementById(`p${aeroplanes[i].color + 1}-c${i - (aeroplanes[i].color * 4)}`);
+			if (aeroplanes[i].inCellId.indexOf(container_chess_goal_prefix) === 0) {
+				player_pos = container_chess_goal_prefix;
+				player_chess.style.background = 'grey';
+			} else if (aeroplanes[i].inCellId.indexOf(container_home_prefix) === 0) {
+				player_pos = `${container_home_prefix}${i - (aeroplanes[i].color * 4)}`;
+			} else {
+				player_pos = aeroplanes[i].inCellId;
+			}
+			player_flow = player.flow[player_pos];
+			player_chess.dataset.pos = player_pos;
+			ctx_top.fillText(i - (aeroplanes[i].color * 4) + 1, player_flow.x - common_distance, player_flow.y + common_distance);
+			ctx_top.strokeText(i - (aeroplanes[i].color * 4) + 1, player_flow.x - common_distance, player_flow.y + common_distance);
+		}
+		rollDice();
+	});
+
+	stompClient.subscribe(`/game/${gameId}/start`, function(res) {
+		appendSystemMessage('Game Start!', system_color);
+		var ctx_hover = boardHover.getContext('2d');
+		Array.from(document.getElementById(`p${index}`).getElementsByClassName('chess')).forEach((element) => {
+			element.addEventListener('click', () => {
+				stompClient.send(`/app/move/${gameId}/${(Number(element.value) - 1)}/`);
+				infoDisabled(true);
+				chessDisabled(true);
+			})
+		})
+		Array.from(document.getElementsByClassName('chess')).forEach((element) => {
+			element.addEventListener('mouseover', () => {
+				if (!element.dataset.pos || element.dataset.pos.indexOf(container_home_prefix) === 0)
+					return;
+				var player = this[element.id.substr(0, 2)],
+					pos = player.flow[element.dataset.pos];
+				ctx_hover.beginPath();
+				ctx_hover.fillStyle = player.color;
+				ctx_hover.arc(pos.x, pos.y, container_chess_common_radius, container_chess_common_startAngle, container_chess_common_endAngle);
+				ctx_hover.fill();
+			})
+			element.addEventListener('mouseout', () => {
+				ctx_hover.clearRect(0, 0, boardHover.width, boardHover.height);
+			})
+		})
+		countDown(() => {
+			if(!document.getElementById('roll').disabled)
+				document.getElementById('roll').click();
+		})
+		rollDice();
+	});
+
+	stompClient.subscribe(`/game/${gameId}/your-turn-${sessionId}`, function(res) {
+		appendSystemMessage('Your Turn!', system_alert_color);
+		infoDisabled(false);
+		elementlDisabled('roll', false);
+	});
+}
+
 var roll = () => {
-	stompClient.send("/app/roll");
+	stompClient.send(`/app/roll/${gameId}`);
 	elementlDisabled('roll', true);
 	chessDisabled(false);
 }
