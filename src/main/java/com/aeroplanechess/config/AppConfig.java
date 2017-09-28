@@ -13,7 +13,7 @@ import com.aeroplanechess.utils.MoveUtils;
 
 @Configuration
 public class AppConfig {
-	
+
 	@Bean(name = "playerGameMap")
 	public Map<String, String> getPlayerGameMap() {
 		return new HashMap<String, String>();
@@ -23,7 +23,7 @@ public class AppConfig {
 	public Map<String, Game> getPlayingGame() {
 		return new HashMap<String, Game>();
 	}
-	
+
 	@Bean(name = "waitingGames")
 	public Map<String, Game> getWaitingGames() {
 		return new HashMap<String, Game>();

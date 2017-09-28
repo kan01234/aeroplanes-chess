@@ -6,3 +6,6 @@ spring:
     view:
       prefix: /WEB-INF/jsp/
       suffix: .jsp
+server:
+  session:
+    'tracking-modes': url
