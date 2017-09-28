@@ -19,12 +19,12 @@ public class AppConfig {
 		return new HashMap<String, String>();
 	}
 
-	@Bean(name = "playingGame")
+	@Bean(name = "playingGames")
 	public Map<String, Game> getPlayingGame() {
 		return new HashMap<String, Game>();
 	}
 	
-	@Bean(name = "waitingGame")
+	@Bean(name = "waitingGames")
 	public Map<String, Game> getWaitingGames() {
 		return new HashMap<String, Game>();
 	}

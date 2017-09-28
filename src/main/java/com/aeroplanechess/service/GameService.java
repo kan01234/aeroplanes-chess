@@ -26,6 +26,7 @@ public class GameService {
 	@Autowired
 	Map<String, Game> playingGames;
 
+	// TODO move to redis ?
 	@Autowired
 	Map<String, String> playerGameMap;
 

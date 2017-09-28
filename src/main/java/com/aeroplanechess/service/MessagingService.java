@@ -3,12 +3,16 @@ package com.aeroplanechess.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MessagingService {
+
+	Logger logger = LoggerFactory.getLogger(MessagingService.class);
 
 	@Autowired
 	SimpMessagingTemplate simpMessagingTemplate;
@@ -34,6 +38,7 @@ public class MessagingService {
 		for (int i = 0; i < keys.length; i++) {
 			map.put(keys[i], values[i]);
 		}
+		logger.info("send to path: " + path + ", data: " + map);
 		simpMessagingTemplate.convertAndSend("/game/" + path, map);
 	}
 
