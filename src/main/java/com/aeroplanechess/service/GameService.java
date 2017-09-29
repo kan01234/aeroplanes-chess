@@ -63,18 +63,32 @@ public class GameService {
 		}
 	}
 
-	public void addPlayer(String sessionId) {
-		addPlayer(sessionId, waitingGames.isEmpty() ? gameBuilder.build() : waitingGames.get(waitingGames.keySet().iterator().next()));
+	public String addPlayer(String sessionId) {
+		Game game = null;
+		if (waitingGames.isEmpty())
+			game = gameBuilder.build();
+		else {
+			for (Game g : waitingGames.values()) {
+				if (!g.isFull()) {
+					game = g;
+					break;
+				}
+			}
+		}
+		return addPlayer(sessionId, game);
 	}
 
-	public void addPlayer(String sessionId, String gameId) {
-		addPlayer(sessionId, waitingGames.containsKey(gameId) ? waitingGames.get(gameId) : null);
+	public String addPlayer(String sessionId, String gameId) {
+		return addPlayer(sessionId, waitingGames.containsKey(gameId) ? waitingGames.get(gameId) : null);
 	}
 
-	void addPlayer(String sessionId, Game game) {
+	String addPlayer(String sessionId, Game game) {
 		if (game == null)
-			messagingService.sendTo("joined", sessionId, new String[] { "error", "message" }, new Object[] { true, "game id not found" });
+			// messagingService.sendTo("joined", sessionId, new String[] { "error",
+			// "message" }, new Object[] { true, "game id not found" });
+			return null;
 
+		String gameId = null;
 		Player[] players = game.getPlayers();
 		boolean added = false;
 		for (int i = 0; i < players.length; i++) {
@@ -84,18 +98,21 @@ public class GameService {
 				player.setName("Player " + (i + 1));
 				player.setSessionId(sessionId);
 				players[i] = player;
-				if (i == players.length - 1)
-					game.setReady(true);
 				added = true;
+				if (i == players.length - 1)
+					game.setFull(true);
 				break;
 			}
 		}
 		if (added) {
 			game.setPlayers(players);
-			checkStart(game);
+			gameId = game.getId();
+			waitingGames.put(game.getId(), game);
+			// checkStart(game);
 			messagingService.sendTo("joined", sessionId, new String[] { "error", "game-id" }, new Object[] { false, game.getId() });
-			messagingService.send("player-list", game.getId(), "players", players);
+			// messagingService.send("player-list", game.getId(), "players", players);
 		}
+		return gameId;
 	}
 
 	public void removePlayer(String sessionId) {
@@ -111,6 +128,7 @@ public class GameService {
 	}
 
 	void removePlayer(String sessionId, Game game, boolean isWaiting) {
+		// TODO update remove isFull, readyCount
 		Player[] players = game.getPlayers();
 		for (int i = 0; i < players.length; i++) {
 			if (players[i] == null)
@@ -123,21 +141,42 @@ public class GameService {
 		game.setPlayers(players);
 		if (isWaiting)
 			waitingGames.put(game.getId(), game);
-		else
+		else {
 			playingGames.put(game.getId(), game);
+		}
 		messagingService.send("player-list", game.getId(), "players", players);
 	}
 
 	void checkStart(Game game) {
-		if (!game.getReady()) {
-			waitingGames.put(game.getId(), game);
+		// if (!game.getReady()) {
+		// waitingGames.put(game.getId(), game);
+		// return;
+		// }
+		// String gameId = game.getId();
+		// waitingGames.remove(gameId);
+		// playingGames.put(gameId, game);
+		messagingService.send("start", game.getId(), "start", true);
+		nextTurn(game, false);
+	}
+
+	public void ready(String httpSessionId, String gameId) {
+		if (!waitingGames.containsKey(gameId)) {
+			// TODO send error
 			return;
 		}
-		String gameId = game.getId();
-		waitingGames.remove(gameId);
-		playingGames.put(gameId, game);
-		messagingService.send("start", gameId, "start", true);
-		nextTurn(game, false);
+		Game game = waitingGames.get(gameId);
+		messagingService.send("player-list", gameId, "players", game.getPlayers());
+		int readyCount = game.getReadyCount() + 1;
+		if (readyCount == 4) {
+			game.setReadyCount(readyCount);
+			waitingGames.remove(gameId);
+			playingGames.put(gameId, game);
+			messagingService.send("start", gameId, "start", true);
+			nextTurn(game, false);
+		} else {
+			game.setReadyCount(readyCount);
+			waitingGames.put(gameId, game);
+		}
 	}
 
 	public void move(String sessionId, String gameId, int aeroplaneIndex) {

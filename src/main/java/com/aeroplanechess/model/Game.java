@@ -9,7 +9,8 @@ public class Game {
 	int lastRoll = -1;
 	int currentPlayer = -1;
 	int continued = 0;
-	boolean ready = false;
+	int readyCount = 0;
+	boolean full = false;
 	Aeroplane[] aeroplanes;
 
 	public String getId() {
@@ -44,12 +45,12 @@ public class Game {
 		this.lastRoll = lastRoll;
 	}
 
-	public boolean getReady() {
-		return ready;
+	public int getReadyCount() {
+		return readyCount;
 	}
 
-	public void setReady(boolean ready) {
-		this.ready = ready;
+	public void setReadyCount(int readyCount) {
+		this.readyCount = readyCount;
 	}
 
 	public Aeroplane[] getAeroplanes() {
@@ -68,10 +69,17 @@ public class Game {
 		this.continued = continued;
 	}
 
+	public boolean isFull() {
+		return full;
+	}
+
+	public void setFull(boolean full) {
+		this.full = full;
+	}
+
 	@Override
 	public String toString() {
-		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", currentPlayer=" + currentPlayer + ", continued=" + continued + ", ready=" + ready + ", aeroplanes=" + Arrays.toString(aeroplanes)
-				+ "]";
+		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", currentPlayer=" + currentPlayer + ", continued=" + continued + ", readyCount=" + readyCount + ", full=" + full + ", aeroplanes=" + Arrays.toString(aeroplanes) + "]";
 	}
 
 }

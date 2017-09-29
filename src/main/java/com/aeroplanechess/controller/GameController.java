@@ -7,9 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.SessionStatus;
 
@@ -30,26 +31,28 @@ public class GameController {
 	// }
 
 	@RequestMapping(value = "/")
-	public String index() {
+	public String index(HttpServletRequest request, Model model, @RequestParam(defaultValue = "") String gameId) {
 		return "index";
 	}
 
 	@RequestMapping("/test")
 	public @ResponseBody String test(HttpServletRequest request, SessionStatus status) {
-		status.setComplete();
 		return request.getSession().getId();
 	}
 
 	@MessageMapping("/join/{gameId}")
-	public void join(@Header("simpSessionId") String sessionId, @DestinationVariable("gameId") String gameId, SimpMessageHeaderAccessor headerAccessor) {
-		logger.info(headerAccessor.getSessionId().toString());
-		logger.info(headerAccessor.getSessionAttributes().get("sessionId").toString());
+	public void join(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId) {
 		if (gameId.equals("null")) {
 			gameService.addPlayer(sessionId);
 		} else {
 			gameService.addPlayer(sessionId, gameId);
 		}
 		// gameService.checkStart();
+	}
+
+	@MessageMapping("/ready/{gameId}")
+	public void ready(@Header("simpSessionId") String sessionId, @DestinationVariable("gameId") String gameId) {
+		gameService.ready(sessionId, gameId);
 	}
 
 	@MessageMapping("/roll/{gameId}")
@@ -61,5 +64,4 @@ public class GameController {
 	public void move(@Header("simpSessionId") String sessionId, @DestinationVariable("gameId") String gameId, @DestinationVariable("aeroplaneIndex") int aeroplaneIndex) {
 		gameService.move(sessionId, gameId, aeroplaneIndex);
 	}
-
 }

@@ -114,14 +114,15 @@ window.addEventListener('load', function() {
 		stompClient.subscribe(`/game/joined-${sessionId}`, function(res) {
 			res = JSON.parse(res.body);
 			console.log(res);
+			gameId = res["game-id"];
 			if(res.error) {
 				// TODO show join game error here
 				return;
 			}
-			gameId = res["game-id"];
 			joined();
 		});
 
+		// TODO add gameId to join?
 		stompClient.send("/app/join/null");
 	});
 	
@@ -257,6 +258,7 @@ var joined = () => {
 			if(sessionId == player.sessionId) {
 				name += " (Me)";
 				index = Number(i) + 1;
+				console.log(index);
 				document.getElementById(`p${index}-info-name`).innerHTML = 'You!';
 			}
 		}
@@ -330,7 +332,7 @@ var joined = () => {
 		var ctx_hover = boardHover.getContext('2d');
 		Array.from(document.getElementById(`p${index}`).getElementsByClassName('chess')).forEach((element) => {
 			element.addEventListener('click', () => {
-				stompClient.send(`/app/move/${gameId}/${(Number(element.value) - 1)}/`);
+				stompClient.send(`/app/move/${gameId}/${(Number(element.value) - 1)}`);
 				infoDisabled(true);
 				chessDisabled(true);
 			})
@@ -362,6 +364,8 @@ var joined = () => {
 		infoDisabled(false);
 		elementlDisabled('roll', false);
 	});
+
+	stompClient.send(`/app/ready/${gameId}`);
 }
 
 var roll = () => {

@@ -8,4 +8,4 @@ spring:
       suffix: .jsp
 server:
   session:
-    'tracking-modes': url
+    'tracking-modes': cookie

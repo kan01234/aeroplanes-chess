@@ -6,8 +6,6 @@ import org.springframework.web.socket.config.annotation.AbstractWebSocketMessage
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 
-import com.aeroplanechess.utils.HttpHandshakeInterceptor;
-
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
@@ -20,7 +18,9 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/aeroplanechess-websocket").addInterceptors(new HttpHandshakeInterceptor()).withSockJS();
+		registry.addEndpoint("/aeroplanechess-websocket")
+				// .addInterceptors(new HttpHandshakeInterceptor())
+				.withSockJS();
 	}
 
 }
