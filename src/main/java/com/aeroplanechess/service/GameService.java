@@ -141,6 +141,7 @@ public class GameService {
 				Map<String, Boolean> readyMap = game.getReadyMap();
 				readyMap.remove(sessionId);
 				if (readyMap.size() <= 1) {
+					// TODO send who won the game?
 					playingGames.remove(gameId);
 					messagingService.send("won", gameId, "player-won", "");
 				}
@@ -155,7 +156,6 @@ public class GameService {
 			game.setFull(false);
 			waitingGames.put(game.getId(), game);
 		} else {
-			// TODO remove playing games when all player leaved?
 			Aeroplane[] aeroplanes = moveUtils.allBackToBase(game.getAeroplanes(), i);
 			game.setAeroplanes(aeroplanes);
 			messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { aeroplanes, i, i });

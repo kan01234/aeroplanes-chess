@@ -249,6 +249,7 @@ var drawCanvas = (canvas, canvas_top) => {
 
 var joined = () => {
 	stompClient.subscribe(`/game/${gameId}/player-list`, function(res) {
+		// TODO show player name, null player as leaved or empty?
 		var players = JSON.parse(res.body).players;
 		for(var i in players) {
 			var player = players[i];
