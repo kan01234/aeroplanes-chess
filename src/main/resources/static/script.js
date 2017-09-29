@@ -296,11 +296,14 @@ var joined = () => {
 		ctx_top = boardChess.getContext('2d');
 		ctx_top.clearRect(0, 0, boardChess.width, boardChess.height);
 		infoDisabled(true);
-		countDown(() => {
-			console.log(document.getElementById('roll'));
-			if(!document.getElementById('roll').disabled)
-				document.getElementById('roll').click();
-		})
+		if(!res.leaved) {
+			// TODO show message for leaved player, somthing like player X leaved, all of the planes of Color backed to the base?
+			countDown(() => {
+				console.log(document.getElementById('roll'));
+				if(!document.getElementById('roll').disabled)
+					document.getElementById('roll').click();
+			});
+		}
 		var aeroplanes = JSON.parse(res.body).aeroplanes;
 		var colorCount = -1;
 		var player, player_flow, player_chess, player_pos;
@@ -363,6 +366,12 @@ var joined = () => {
 		appendSystemMessage('Your Turn!', system_alert_color);
 		infoDisabled(false);
 		elementlDisabled('roll', false);
+	});
+	
+	stompClient.subscribe(`/game/${gameId}/won`, function(res) {
+		// TODO show the game is end, all disable
+		body = JSON.parse(res.body);
+		console.log(body);
 	});
 
 	stompClient.send(`/app/ready/${gameId}`);

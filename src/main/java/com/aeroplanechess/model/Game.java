@@ -1,6 +1,8 @@
 package com.aeroplanechess.model;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Game {
 
@@ -9,7 +11,7 @@ public class Game {
 	int lastRoll = -1;
 	int currentPlayer = -1;
 	int continued = 0;
-	int readyCount = 0;
+	Map<String, Boolean> readyMap = new HashMap<String, Boolean>();
 	boolean full = false;
 	Aeroplane[] aeroplanes;
 
@@ -45,14 +47,6 @@ public class Game {
 		this.lastRoll = lastRoll;
 	}
 
-	public int getReadyCount() {
-		return readyCount;
-	}
-
-	public void setReadyCount(int readyCount) {
-		this.readyCount = readyCount;
-	}
-
 	public Aeroplane[] getAeroplanes() {
 		return aeroplanes;
 	}
@@ -77,9 +71,17 @@ public class Game {
 		this.full = full;
 	}
 
+	public Map<String, Boolean> getReadyMap() {
+		return readyMap;
+	}
+
+	public void setReadyMap(Map<String, Boolean> readyMap) {
+		this.readyMap = readyMap;
+	}
+
 	@Override
 	public String toString() {
-		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", currentPlayer=" + currentPlayer + ", continued=" + continued + ", readyCount=" + readyCount + ", full=" + full + ", aeroplanes=" + Arrays.toString(aeroplanes) + "]";
+		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", currentPlayer=" + currentPlayer + ", continued=" + continued + ", readyMap=" + readyMap + ", full=" + full + ", aeroplanes=" + Arrays.toString(aeroplanes) + "]";
 	}
 
 }

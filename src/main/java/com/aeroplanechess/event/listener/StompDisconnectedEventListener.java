@@ -23,7 +23,6 @@ public class StompDisconnectedEventListener implements ApplicationListener<Sessi
 	@Override
 	public void onApplicationEvent(SessionDisconnectEvent sessionDisconnectEvent) {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(sessionDisconnectEvent.getMessage());
-		logger.info(headerAccessor.toString());
 		gameService.removePlayer(headerAccessor.getSessionId());
 	}
 }
