@@ -79,31 +79,26 @@ var number_of_player = 4,
 	system_default_color = '#565656',
 	system_alert_color = '#ce0000';
 
-var stompClient = null,
-	sessionId,
+var sessionId,
 	gameId,
 	diceInterval,
 	countDownInterval,
 	index,
 	dices = ['&#9856;', '&#9857;', '&#9858;', '&#9859;', '&#9860;', '&#9861;' ],
 	colors =	["yellow", "blue", "green", "red" ],
-	sockjs = new SockJS('/aeroplanechess-websocket');
+	sockjs = new SockJS('/aeroplanechess-websocket'),
+	stompClient = Stomp.over(sockjs);
 
 var board,
 	boardChess,
-	boardHover,
-	i;
+	boardHover;
 
 window.addEventListener('load', function() {
-	appendSystemMessage('Welcome!');
-
 	board = document.getElementById("board");
 	boardChess = document.getElementById('board-chess');
 	boardHover = document.getElementById('board-hover');
-	i;
-	
+
 	/* socket */
-	stompClient = Stomp.over(sockjs);
 	stompClient.connect({}, function(frame) {
 		console.log('Connected: ' + frame);
 		sessionId = /\/([^\/]+)\/websocket/.exec(sockjs._transport.url)[1];
@@ -125,13 +120,14 @@ window.addEventListener('load', function() {
 		// TODO add gameId to join?
 		stompClient.send("/app/join/null");
 	});
-	
+
 	/* board */
 	resizeCanvas(board);
 	resizeCanvas(boardChess);
 	resizeCanvas(boardHover);
 	elementlDisabled('roll', true);
-	
+
+	var i;
 	/* player */
 	for (i = 1; i <= number_of_player; i++) {
 		this[`p${i}`] = new Player(`Player ${i}`, this[`number_of_steps_p${i}`], this[`turn_of_steps_p${i}`],
@@ -146,6 +142,12 @@ window.addEventListener('load', function() {
 	
 	drawCanvas(board, boardChess);
 }, false);
+
+var start = () => {
+	document.getElementById('board-mask').style.display = 'none';
+	appendSystemMessage(`Welcome ${document.getElementById('name').value}!`);
+	appendSystemMessage('Waiting player to join...');
+}
 
 var resizeCanvas = (canvas) => {
 	canvas.width = canvas_width;
@@ -257,11 +259,11 @@ var joined = () => {
 				continue;
 			var name = player.name;
 			if(sessionId == player.sessionId) {
-				name += " (Me)";
+				name += " (You)";
 				index = Number(i) + 1;
 				console.log(index);
-				document.getElementById(`p${index}-info-name`).innerHTML = 'You!';
 			}
+			document.getElementById(`p${Number(i) + 1}-info-name`).innerHTML = name;
 		}
 	});
 
@@ -305,9 +307,9 @@ var joined = () => {
 					document.getElementById('roll').click();
 			});
 		}
-		var aeroplanes = JSON.parse(res.body).aeroplanes;
-		var colorCount = -1;
-		var player, player_flow, player_chess, player_pos;
+		var aeroplanes = JSON.parse(res.body).aeroplanes,
+			colorCount = -1,
+			player, player_flow, player_chess, player_pos;
 		ctx_top.font = 'bold 30px Arial';
 		for(var i = 0 in aeroplanes) {
 			player = this[`p${aeroplanes[i].color + 1}`];

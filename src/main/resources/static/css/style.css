@@ -2,7 +2,6 @@ html {
 	background-color: #3e81e7b3;
 	border-top: 8px solid #1520ffb3;
 	box-sizing: border-box;
-	height: calc(100vh - 8px);
 }
 
 body {
@@ -34,6 +33,47 @@ body {
 	top: 8px;
 	width: 100%;
 	z-index: -1;
+}
+
+#board-mask {
+	background: rgba(80, 80, 80, 0.8);
+	height: 100%;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	z-index: 1;
+}
+#board-main {
+	left: calc(50% - 125px);
+	position: absolute;
+	top: calc(50% - 125px);
+}
+#board-main input {
+	background: #1520ffb3;
+	border: 1px solid #3e81e7b3;
+	box-sizing: border-box;
+	color: white;
+	display: block;
+	font-size: 20px;
+	height: 80px;
+	margin: 0 0 5px;
+	width: 250px;
+}
+#board-main input:first-child {
+	padding-left: calc(50% - 40px);
+}
+#board-main input:hover {
+	background: 	#3e81e7b3;
+}
+#board-main input:last-child:hover {
+	cursor: pointer;
+}
+#board-main input:active {
+	background: #1520ffb3;
+}
+
+#main-mask {
+	z-index: 1;	
 }
 
 #background-mask {
@@ -107,11 +147,12 @@ body {
 
 .info-container>div {
 	float: left;
-	width: 50%;
+	width: 60%;
 }
 
 .info-container>div:last-child {
 	text-align: right;
+	width: 40%;
 }
 
 .info-turn {

@@ -7,6 +7,12 @@
 </head>
 <body>
 	<h1 id="title">Aeroplane Chess</h1>
+	<div id="board-mask">
+		<form id="board-main" action="javascript:start()">
+			<input id="name" type="text" placeholder="N A M E" required maxlength="6" />
+			<input type="submit" value="START" />
+		</form>
+	</div>
 	<div id="background"></div>
 	<div id="background-mask"></div>
 	<div class="wrapper">
