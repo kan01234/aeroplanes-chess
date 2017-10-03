@@ -171,20 +171,13 @@ public class GameService {
 	}
 
 	void checkStart(Game game) {
-		// if (!game.getReady()) {
-		// waitingGames.put(game.getId(), game);
-		// return;
-		// }
-		// String gameId = game.getId();
-		// waitingGames.remove(gameId);
-		// playingGames.put(gameId, game);
 		messagingService.send("start", game.getId(), "start", true);
 		nextTurn(game, false);
 	}
 
 	public void ready(String sessionId, String gameId) {
-		if (!waitingGames.containsKey(gameId)) {
-			// TODO send error
+		if (!isWaitingGame(gameId)) {
+			isWaitingGame(gameId);
 			return;
 		}
 		Game game = waitingGames.get(gameId);
@@ -260,6 +253,14 @@ public class GameService {
 	boolean isPlayingGame(String gameId) {
 		if (!playingGames.containsKey(gameId)) {
 			messagingService.send("error", gameId, "message", "game not found in playing games list!!!");
+			return false;
+		}
+		return true;
+	}
+
+	boolean isWaitingGame(String gameId) {
+		if (!waitingGames.containsKey(gameId)) {
+			messagingService.send("error", gameId, "message", "game not found in waiting games list!!!");
 			return false;
 		}
 		return true;
