@@ -31,7 +31,8 @@ public class GameController {
 	// }
 
 	@RequestMapping(value = "/")
-	public String index(HttpServletRequest request, Model model, @RequestParam(defaultValue = "") String gameId) {
+	public String index(HttpServletRequest request, Model model, @RequestParam(defaultValue = "null") String gameId) {
+		model.addAttribute("gameId", gameId);
 		return "index";
 	}
 

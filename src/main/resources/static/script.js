@@ -106,21 +106,25 @@ var join = () => {
 		sessionId = /\/([^\/]+)\/websocket/.exec(sockjs._transport.url)[1];
 		console.log("connected, session id: " + sessionId);
 
-		// TODO subscribe /game/${gameId}/error
+		// TODO review error handling
+		stompClient.subscribe(`/game/${gameId}/error`, function(res) {
+			var body = JSON.parse(res.body)
+			console.log(body);
+			appendSystemMessage(`Error, ${body.message}`);
+		});
 
 		stompClient.subscribe(`/game/joined-${sessionId}`, function(res) {
 			res = JSON.parse(res.body);
-			console.log(res);
 			gameId = res["game-id"];
 			if(res.error) {
-				// TODO show join game error here
+				// TODO review error handling
+				appendSystemMessage('Error, the game is full or not existing in waiting game list.')
 				return;
 			}
 			joined();
 		});
 
-		// TODO add gameId to join?
-		stompClient.send("/app/join/null");
+		stompClient.send(`/app/join/${gameId}`);
 	});
 
 	/* board */
@@ -378,6 +382,7 @@ var joined = () => {
 		// TODO show the game is end, all disable
 		body = JSON.parse(res.body);
 		console.log(body);
+		appendSystemMessage(`${colors[body.currentPlayer]}`);
 	});
 
 	stompClient.send(`/app/ready/${gameId}`);

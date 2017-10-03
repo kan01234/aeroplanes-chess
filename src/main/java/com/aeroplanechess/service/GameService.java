@@ -1,7 +1,6 @@
 package com.aeroplanechess.service;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +79,11 @@ public class GameService {
 	}
 
 	public String addPlayer(String sessionId, String gameId) {
-		return addPlayer(sessionId, waitingGames.containsKey(gameId) ? waitingGames.get(gameId) : null);
+		if (waitingGames.containsKey(gameId))
+			return addPlayer(sessionId, waitingGames.get(gameId));
+		else
+			messagingService.sendTo("joined", sessionId, "error", true);
+		return null;
 	}
 
 	String addPlayer(String sessionId, Game game) {
@@ -256,7 +259,7 @@ public class GameService {
 
 	boolean isPlayingGame(String gameId) {
 		if (!playingGames.containsKey(gameId)) {
-			messagingService.send("error", gameId, "message", "game not foundin playing games list");
+			messagingService.send("error", gameId, "message", "game not found in playing games list!!!");
 			return false;
 		}
 		return true;

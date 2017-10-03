@@ -80,6 +80,9 @@
 		<div id="count"></div>
 	</div>
 </body>
+<script>
+	var gameId = "${gameId}";
+</script>
 <script src="/webjars/stomp-websocket/stomp.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="/script.js"></script>

@@ -29,6 +29,10 @@ public class MessagingService {
 		sendTo(gameId + "/" + path, sessionId, new String[] { key }, new Object[] { value });
 	}
 
+	public void sendTo(String path, String sessionId, String key, Object value) {
+		sendTo(path, sessionId, new String[] { key }, new Object[] { value });
+	}
+
 	public void sendTo(String path, String sessionId, String[] keys, Object[] values) {
 		send(path + "-" + sessionId, keys, values);
 	}
