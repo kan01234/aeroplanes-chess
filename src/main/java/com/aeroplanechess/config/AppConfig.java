@@ -1,7 +1,7 @@
 package com.aeroplanechess.config;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,17 +16,17 @@ public class AppConfig {
 
 	@Bean(name = "playerGameMap")
 	public Map<String, String> getPlayerGameMap() {
-		return new HashMap<String, String>();
+		return new ConcurrentHashMap<String, String>();
 	}
 
 	@Bean(name = "playingGames")
 	public Map<String, Game> getPlayingGame() {
-		return new HashMap<String, Game>();
+		return new ConcurrentHashMap<String, Game>();
 	}
 
 	@Bean(name = "waitingGames")
 	public Map<String, Game> getWaitingGames() {
-		return new HashMap<String, Game>();
+		return new ConcurrentHashMap<String, Game>();
 	}
 
 	@Bean

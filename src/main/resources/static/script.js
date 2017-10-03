@@ -86,14 +86,16 @@ var sessionId,
 	index,
 	dices = ['&#9856;', '&#9857;', '&#9858;', '&#9859;', '&#9860;', '&#9861;' ],
 	colors =	["yellow", "blue", "green", "red" ],
-	sockjs = new SockJS('/aeroplanechess-websocket'),
-	stompClient = Stomp.over(sockjs);
+	sockjs,
+	stompClient;
 
 var board,
 	boardChess,
 	boardHover;
 
-window.addEventListener('load', function() {
+var join = () => {
+	sockjs = new SockJS('/aeroplanechess-websocket'),
+	stompClient = Stomp.over(sockjs);
 	board = document.getElementById("board");
 	boardChess = document.getElementById('board-chess');
 	boardHover = document.getElementById('board-hover');
@@ -141,9 +143,10 @@ window.addEventListener('load', function() {
 	}
 	
 	drawCanvas(board, boardChess);
-}, false);
+}
 
 var start = () => {
+	join();
 	document.getElementById('board-mask').style.display = 'none';
 	appendSystemMessage(`Welcome ${document.getElementById('name').value}!`);
 	appendSystemMessage('Waiting player to join...');
