@@ -131,12 +131,12 @@ body {
 	background: #87c4f8b3;
 	height: 30%;
 	margin-bottom: 20px;
-	height: 30%;
+	height: calc(50% - 20px);
 }
 
 .wrapper-chat {
 	border: none;
-	height: 67%;
+	height: 50%;
 }
 
 .wrapper-options>div {
@@ -198,7 +198,7 @@ body {
 	border-top: 1px dotted #1520ffb3;
 	color: #1520ffb3;
 	font-size : 120px;
-	height: 145px;
+	height: 143px;
 	text-align: center;
 	font-size: 120px;
 }
