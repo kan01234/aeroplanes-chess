@@ -2,11 +2,19 @@ html {
 	background-color: #3e81e7b3;
 	border-top: 8px solid #1520ffb3;
 	box-sizing: border-box;
+	min-height: 920px;
+	height: 100%;
+	min-width: 1100px;
+	margin: 0 auto;
+	width: 100%;
 }
 
 body {
+	min-height: inherit;
+	min-width: inherit;
 	margin: 0;
 	padding: 0;
+	width: inherit;
 }
 
 #title {
@@ -16,31 +24,37 @@ body {
 	margin-top: 0;
 	padding: 15px;
 	text-align: center;
-	width: inherit;
 }
 
 #background, #background-mask {
 	background-image: url('/image/background2.jpg');
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
+	min-height: inherit;
 	height: calc(100% - 8px);
 	-webkit-filter: blur(5px);
 	-moz-filter: blur(5px);
 	-o-filter: blur(5px);
 	-ms-filter: blur(5px);
 	filter: blur(5px);
+	min-width: inherit;
 	position: absolute;
 	top: 8px;
-	width: 100%;
+	width: inherit;
 	z-index: -1;
+}
+#background-mask {
+	background: #808080cc;
 }
 
 #board-mask {
 	background: rgba(80, 80, 80, 0.8);
-	height: 100%;
+	height: calc(100% - 8px);
+	min-height: inherit;
+	min-width: inherit;
 	position: absolute;
 	top: 0;
-	width: 100%;
+	width: inherit;
 	z-index: 1;
 }
 #board-main {
@@ -76,14 +90,9 @@ body {
 	z-index: 1;	
 }
 
-#background-mask {
-	background: #808080cc;
-}
-
 .wrapper {
 	margin: 0 auto;
 	position: relative;
-	width: 1100px;
 }
 
 .wrapper-options, .wrapper-message {
@@ -91,9 +100,13 @@ body {
 	box-sizing: border-box;
 	display: inline-block;
 	height: 676px;
-	margin-left: 15px;
+	margin-left: 625px;
+	position: absolute;
 	vertical-align: top;
 	width: 225px;
+}
+.wrapper-message {
+	margin-left: 865px;
 }
 
 .wrapper-options {
@@ -264,6 +277,7 @@ body {
 #board {
 	display: inline-block;
 	margin: 0 auto;
+	position: absolute;
 }
 
 #board-chess, #board-hover {
