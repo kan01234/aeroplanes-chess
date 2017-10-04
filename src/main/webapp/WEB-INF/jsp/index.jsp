@@ -6,7 +6,13 @@
 <link href="/css/style.css" rel="stylesheet"></link>
 </head>
 <body>
-	<h1 id="title">Aeroplane Chess</h1>
+	<div class="wrapper-header">
+		<h1 id="title">Aeroplane Chess</h1>
+		<div class="wrapper-contact">
+			<div class="contact-email">email</div>
+			<div class="contact-github">github</div>
+		</div>
+	</div>
 	<div id="board-mask">
 		<form id="board-main" action="javascript:start()">
 			<input id="name" type="text" placeholder="N A M E" required maxlength="6" />
@@ -76,6 +82,17 @@
 		<div class="wrapper-message">
 			<div id="wrapper-system" class="wrapper-system"></div>
 			<div id="wrapper-chat" class="wrapper-chat"></div>
+		</div>
+		<div class="wrapper-rule">
+			<div>
+				Rules
+			</div>
+			<ol class="rule">
+				<li>Roll 2, 4, 6 can move one of the plane from base to take off point</li>
+				<li>If destination of the move has more than two planes, moved plane back to the base</li>
+				<li>Roll 6 can continue the turn, however if the third roll is 6, all of the plane of that player need to back to the base</li>
+				<li>Have fun!</li>
+			</ol>
 		</div>
 		<div id="count"></div>
 	</div>
