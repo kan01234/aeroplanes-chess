@@ -20,7 +20,6 @@
 		<canvas id="board-chess"></canvas>
 		<canvas id="board-hover"></canvas>
 		<div class="wrapper-options">
-			<div id="dice"></div>
 			<div id="p1" class="player-container">
 				<div class="info-container">
 					<div id="p1-info-name" class="info-name">Player 1</div>
@@ -69,6 +68,7 @@
 					<input type="button" id="p4-c3" class="chess" value="4" disabled data-pos="ba3">
 				</div>
 			</div>
+			<div id="dice"></div>
 			<div>
 				<input id="roll" type="button" onclick="roll()" value="ROLL" disabled>
 			</div>

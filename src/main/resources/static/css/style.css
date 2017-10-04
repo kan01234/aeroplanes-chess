@@ -195,8 +195,10 @@ body {
 }
 
 #dice {
-	color: #1520ffb3; font-size : 120px;
-	height: auto;
+	border-top: 1px dotted #1520ffb3;
+	color: #1520ffb3;
+	font-size : 120px;
+	height: 145px;
 	text-align: center;
 	font-size: 120px;
 }

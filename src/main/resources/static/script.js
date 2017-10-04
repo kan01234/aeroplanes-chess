@@ -93,12 +93,36 @@ var board,
 	boardChess,
 	boardHover;
 
-var join = () => {
-	sockjs = new SockJS('/aeroplanechess-websocket'),
-	stompClient = Stomp.over(sockjs);
+window.addEventListener('load', () => {
 	board = document.getElementById("board");
 	boardChess = document.getElementById('board-chess');
 	boardHover = document.getElementById('board-hover');
+
+	/* board */
+	resizeCanvas(board);
+	resizeCanvas(boardChess);
+	resizeCanvas(boardHover);
+	elementlDisabled('roll', true);
+
+	var i;
+	/* player */
+	for (i = 1; i <= number_of_player; i++) {
+		this[`p${i}`] = new Player(`Player ${i}`, this[`number_of_steps_p${i}`], this[`turn_of_steps_p${i}`],
+			this[`color_p${i}`], this[`color_of_steps_p${i}`],
+			new Container_Home(this[`container_home_p${i}_x`], this[`container_home_p${i}_y`]),
+			new Container_Start(this[`container_start_p${i}_x`], this[`container_start_p${i}_y`], this[`container_start_p${i}_p`])
+		);
+
+		for (j = 1; j <= number_of_chess; j++)
+			this[`p${i}`].addChess(new Chess(`Chess ${j}`, this[`container_chess_c${j}_x`], this[`container_chess_c${j}_y`]))
+	}
+	
+	drawCanvas(board, boardChess);
+})
+
+var join = () => {
+	sockjs = new SockJS('/aeroplanechess-websocket'),
+	stompClient = Stomp.over(sockjs);
 
 	/* socket */
 	stompClient.connect({}, function(frame) {
@@ -126,27 +150,6 @@ var join = () => {
 
 		stompClient.send(`/app/join/${gameId}`);
 	});
-
-	/* board */
-	resizeCanvas(board);
-	resizeCanvas(boardChess);
-	resizeCanvas(boardHover);
-	elementlDisabled('roll', true);
-
-	var i;
-	/* player */
-	for (i = 1; i <= number_of_player; i++) {
-		this[`p${i}`] = new Player(`Player ${i}`, this[`number_of_steps_p${i}`], this[`turn_of_steps_p${i}`],
-			this[`color_p${i}`], this[`color_of_steps_p${i}`],
-			new Container_Home(this[`container_home_p${i}_x`], this[`container_home_p${i}_y`]),
-			new Container_Start(this[`container_start_p${i}_x`], this[`container_start_p${i}_y`], this[`container_start_p${i}_p`])
-		);
-
-		for (j = 1; j <= number_of_chess; j++)
-			this[`p${i}`].addChess(new Chess(`Chess ${j}`, this[`container_chess_c${j}_x`], this[`container_chess_c${j}_y`]))
-	}
-	
-	drawCanvas(board, boardChess);
 }
 
 var start = () => {
