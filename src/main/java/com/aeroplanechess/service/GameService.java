@@ -1,5 +1,6 @@
 package com.aeroplanechess.service;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ public class GameService {
 	MoveUtils moveUtils;
 
 	public void roll(String sessionId, String gameId) {
+		logger.info("roll, sessionId: " + sessionId + ", gameId: " + gameId);
 		if (!isPlayingGame(gameId))
 			return;
 
@@ -63,7 +65,8 @@ public class GameService {
 		}
 	}
 
-	public String addPlayer(String sessionId) {
+	public synchronized String addPlayer(String sessionId) {
+		logger.info("addPlayer, sessionId: " + sessionId);
 		Game game = null;
 		if (waitingGames.isEmpty())
 			game = gameBuilder.build();
@@ -78,7 +81,8 @@ public class GameService {
 		return addPlayer(sessionId, game);
 	}
 
-	public String addPlayer(String sessionId, String gameId) {
+	public synchronized String addPlayer(String sessionId, String gameId) {
+		logger.info("addPlayer, sessionId: " + sessionId + ", gameId: " + gameId);
 		if (waitingGames.containsKey(gameId))
 			return addPlayer(sessionId, waitingGames.get(gameId));
 		else
@@ -86,10 +90,9 @@ public class GameService {
 		return null;
 	}
 
-	String addPlayer(String sessionId, Game game) {
+	synchronized String addPlayer(String sessionId, Game game) {
+		logger.info("addPlayer, sessionId: " + sessionId + ", game: " + game);
 		if (game == null)
-			// messagingService.sendTo("joined", sessionId, new String[] { "error",
-			// "message" }, new Object[] { true, "game id not found" });
 			return null;
 
 		String gameId = null;
@@ -116,13 +119,12 @@ public class GameService {
 		gameId = game.getId();
 		waitingGames.put(gameId, game);
 		playerGameMap.put(sessionId, gameId);
-		// checkStart(game);
 		messagingService.sendTo("joined", sessionId, new String[] { "error", "game-id" }, new Object[] { false, game.getId() });
-		// messagingService.send("player-list", game.getId(), "players", players);
 		return gameId;
 	}
 
 	public void removePlayer(String sessionId) {
+		logger.info("removePlayer, sessionId: " + sessionId);
 		if (!playerGameMap.containsKey(sessionId))
 			return;
 
@@ -136,6 +138,7 @@ public class GameService {
 	}
 
 	void removePlayer(String sessionId, Game game, boolean isWaiting) {
+		logger.info("removePlayer, sessionId: " + sessionId + ", game: " + game + ", isWaiting: " + isWaiting);
 		Player[] players = game.getPlayers();
 		String gameId = game.getId();
 		int i;
@@ -154,7 +157,6 @@ public class GameService {
 			}
 		}
 
-		logger.info("player " + i + " leaved");
 		game.setPlayers(players);
 		if (isWaiting) {
 			game.setFull(false);
@@ -171,11 +173,13 @@ public class GameService {
 	}
 
 	void checkStart(Game game) {
+		logger.info("checkStart, game: " + game);
 		messagingService.send("start", game.getId(), "start", true);
 		nextTurn(game, false);
 	}
 
-	public void ready(String sessionId, String gameId) {
+	public synchronized void ready(String sessionId, String gameId) {
+		logger.info("ready, sessionId: " + sessionId + " , gam");
 		if (!isWaitingGame(gameId)) {
 			isWaitingGame(gameId);
 			return;
@@ -196,6 +200,7 @@ public class GameService {
 	}
 
 	public void move(String sessionId, String gameId, int aeroplaneIndex) {
+		logger.info("move, sessionId: " + sessionId + ", gameId: " + gameId + ", aeroplaneIndex: " + aeroplaneIndex);
 		if (!isPlayingGame(gameId))
 			return;
 
@@ -217,6 +222,7 @@ public class GameService {
 	}
 
 	void thridSix(Game game) {
+		logger.info("thridSix, game: " + game);
 		Aeroplane[] aeroplanes = moveUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayer());
 		game.setAeroplanes(aeroplanes);
 		messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { aeroplanes, true });
@@ -224,6 +230,7 @@ public class GameService {
 	}
 
 	void nextTurn(Game game, boolean isContinue) {
+		logger.info("nextTurn, game:" + game + ", isContinue: " + isContinue);
 		if (!isContinue) {
 			int currentPlayer = game.getCurrentPlayer();
 			do {
@@ -240,6 +247,7 @@ public class GameService {
 	}
 
 	boolean isWin(Aeroplane[] aeroplanes, int currentPlayer) {
+		logger.info("isWin, aeroplanes: " + Arrays.toString(aeroplanes) + ", currentPlayer: " + currentPlayer);
 		int count = 0;
 		for (int i = currentPlayer * 4; i < i + 4; i++) {
 			if (aeroplanes[i].getInCellId().substring(0, 2).equals(CellPrefix.Goal.getPrefix()))
