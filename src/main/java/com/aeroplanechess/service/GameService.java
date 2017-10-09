@@ -12,9 +12,8 @@ import com.aeroplanechess.enums.CellPrefix;
 import com.aeroplanechess.model.Aeroplane;
 import com.aeroplanechess.model.Game;
 import com.aeroplanechess.model.Player;
-import com.aeroplanechess.utils.DiceUtils;
 import com.aeroplanechess.utils.GameBuilder;
-import com.aeroplanechess.utils.MoveUtils;
+import com.aeroplanechess.utils.GameUtils;
 
 @Service
 public class GameService {
@@ -40,10 +39,7 @@ public class GameService {
 	GameBuilder gameBuilder;
 
 	@Autowired
-	DiceUtils diceUtils;
-
-	@Autowired
-	MoveUtils moveUtils;
+	GameUtils gameUtils;
 
 	public void roll(String sessionId, String gameId) {
 		logger.info("roll, sessionId: " + sessionId + ", gameId: " + gameId);
@@ -51,7 +47,7 @@ public class GameService {
 			return;
 
 		Game game = playingGames.get(gameId);
-		int rollResult = diceUtils.roll();
+		int rollResult = gameUtils.roll();
 
 		// send roll result to all players
 		game.setLastRoll(rollResult);
@@ -153,7 +149,7 @@ public class GameService {
 		if (isWaiting)
 			game.setFull(false);
 		else {
-			moveUtils.allBackToBase(game.getAeroplanes(), i);
+			gameUtils.allBackToBase(game.getAeroplanes(), i);
 			messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), i, i });
 			if (i == game.getCurrentPlayer())
 				nextTurn(game, false);
@@ -195,7 +191,7 @@ public class GameService {
 		int currentPlayer = game.getCurrentPlayer();
 		Aeroplane[] aeroplanes = game.getAeroplanes();
 		// move
-		aeroplanes = moveUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
+		aeroplanes = gameUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
 		messagingService.send("move-result", gameId, "aeroplanes", aeroplanes);
 		// check win
 		if (isWin(aeroplanes, currentPlayer)) {
@@ -208,7 +204,7 @@ public class GameService {
 
 	void thridSix(Game game) {
 		logger.info("thridSix, game: " + game);
-		moveUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayer());
+		gameUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayer());
 		messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { game.getAeroplanes(), true });
 		nextTurn(game, false);
 	}
@@ -256,6 +252,14 @@ public class GameService {
 			return false;
 		}
 		return true;
+	}
+
+	public Map<String, Game> getWaitingGames() {
+		return waitingGames;
+	}
+
+	public Map<String, Game> getPlayingGames() {
+		return playingGames;
 	}
 
 }

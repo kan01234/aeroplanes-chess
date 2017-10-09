@@ -15,7 +15,6 @@ public class DiceUtils {
 
 	public int roll() {
 		return random.nextInt(max + 1 - min) + min;
-//		return 6;
 	}
 
 }
