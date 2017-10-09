@@ -65,12 +65,13 @@ public class GameService {
 		}
 	}
 
-	public synchronized String addPlayer(String sessionId) {
+	public synchronized String addPlayer(String sessionId, String name) {
 		logger.info("addPlayer, sessionId: " + sessionId);
 		Game game = null;
-		if (waitingGames.isEmpty())
+		if (waitingGames.isEmpty()) {
 			game = gameBuilder.build();
-		else {
+			waitingGames.put(game.getId(), game);
+		} else {
 			for (Game g : waitingGames.values()) {
 				if (!g.isFull()) {
 					game = g;
@@ -78,48 +79,38 @@ public class GameService {
 				}
 			}
 		}
-		return addPlayer(sessionId, game);
+		return addPlayer(sessionId, name, game);
 	}
 
-	public synchronized String addPlayer(String sessionId, String gameId) {
+	public synchronized String addPlayer(String sessionId, String gameId, String name) {
 		logger.info("addPlayer, sessionId: " + sessionId + ", gameId: " + gameId);
 		if (waitingGames.containsKey(gameId))
-			return addPlayer(sessionId, waitingGames.get(gameId));
+			return addPlayer(sessionId, name, waitingGames.get(gameId));
 		else
 			messagingService.sendTo("joined", sessionId, "error", true);
 		return null;
 	}
 
-	synchronized String addPlayer(String sessionId, Game game) {
+	synchronized String addPlayer(String sessionId, String name, Game game) {
 		logger.info("addPlayer, sessionId: " + sessionId + ", game: " + game);
 		if (game == null)
 			return null;
 
 		String gameId = null;
+		int i = 0;
 		Player[] players = game.getPlayers();
-		boolean added = false;
-		for (int i = 0; i < players.length; i++) {
+		for (; i < players.length; i++) {
 			if (players[i] == null) {
-				Player player = new Player();
-				player.setColor(i);
-				player.setName("Player " + (i + 1));
-				player.setSessionId(sessionId);
-				players[i] = player;
-				added = true;
+				players[i] = new Player(name, i, sessionId);
 				if (i == players.length - 1)
 					game.setFull(true);
 				break;
 			}
 		}
 
-		if (!added)
-			return null;
-
-		game.setPlayers(players);
 		gameId = game.getId();
-		waitingGames.put(gameId, game);
 		playerGameMap.put(sessionId, gameId);
-		messagingService.sendTo("joined", sessionId, new String[] { "error", "game-id" }, new Object[] { false, game.getId() });
+		messagingService.sendTo("joined", sessionId, new String[] { "error", "game-id", "index" }, new Object[] { false, game.getId(), i });
 		return gameId;
 	}
 
@@ -147,25 +138,23 @@ public class GameService {
 				players[i] = null;
 				Map<String, Boolean> readyMap = game.getReadyMap();
 				readyMap.remove(sessionId);
-				if (readyMap.size() <= 1) {
-					// TODO send who won the game?
+				if (readyMap.size() == 1) {
+					int j = 0;
+					for (; j < players.length; j++)
+						if (players[j] != null)
+							break;
 					playingGames.remove(gameId);
-					messagingService.send("won", gameId, "player-won", "");
+					messagingService.send("won", gameId, "player-won", j);
 				}
-				game.setReadyMap(readyMap);
 				break;
 			}
 		}
 
-		game.setPlayers(players);
-		if (isWaiting) {
+		if (isWaiting)
 			game.setFull(false);
-			waitingGames.put(game.getId(), game);
-		} else {
-			Aeroplane[] aeroplanes = moveUtils.allBackToBase(game.getAeroplanes(), i);
-			game.setAeroplanes(aeroplanes);
-			messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { aeroplanes, i, i });
-			playingGames.put(game.getId(), game);
+		else {
+			moveUtils.allBackToBase(game.getAeroplanes(), i);
+			messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), i, i });
 			if (i == game.getCurrentPlayer())
 				nextTurn(game, false);
 		}
@@ -178,7 +167,7 @@ public class GameService {
 		nextTurn(game, false);
 	}
 
-	public synchronized void ready(String sessionId, String gameId) {
+	public void ready(String sessionId, String gameId) {
 		logger.info("ready, sessionId: " + sessionId + " , gam");
 		if (!isWaitingGame(gameId)) {
 			isWaitingGame(gameId);
@@ -188,14 +177,11 @@ public class GameService {
 		messagingService.send("player-list", gameId, "players", game.getPlayers());
 		Map<String, Boolean> readyMap = game.getReadyMap();
 		readyMap.put(sessionId, true);
-		game.setReadyMap(readyMap);
 		if (readyMap.size() == 4) {
 			waitingGames.remove(gameId);
 			playingGames.put(gameId, game);
 			messagingService.send("start", gameId, "start", true);
 			nextTurn(game, false);
-		} else {
-			waitingGames.put(gameId, game);
 		}
 	}
 
@@ -210,7 +196,6 @@ public class GameService {
 		Aeroplane[] aeroplanes = game.getAeroplanes();
 		// move
 		aeroplanes = moveUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
-		game.setAeroplanes(aeroplanes);
 		messagingService.send("move-result", gameId, "aeroplanes", aeroplanes);
 		// check win
 		if (isWin(aeroplanes, currentPlayer)) {
@@ -223,26 +208,25 @@ public class GameService {
 
 	void thridSix(Game game) {
 		logger.info("thridSix, game: " + game);
-		Aeroplane[] aeroplanes = moveUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayer());
-		game.setAeroplanes(aeroplanes);
-		messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { aeroplanes, true });
+		moveUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayer());
+		messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { game.getAeroplanes(), true });
 		nextTurn(game, false);
 	}
 
+	// maybe bug here?
 	void nextTurn(Game game, boolean isContinue) {
 		logger.info("nextTurn, game:" + game + ", isContinue: " + isContinue);
-		if (!isContinue) {
+		if (isContinue)
+			game.setContinued(game.getContinued() + 1);
+		else {
 			int currentPlayer = game.getCurrentPlayer();
-			do {
+			do
 				currentPlayer = ++currentPlayer % 4;
-			} while (game.getPlayers()[currentPlayer] == null);
+			while (game.getPlayers()[currentPlayer] == null);
 			game.setCurrentPlayer(currentPlayer);
 			game.setContinued(0);
-		} else {
-			game.setContinued(game.getContinued() + 1);
 		}
 
-		playingGames.put(game.getId(), game);
 		messagingService.sendTo("your-turn", game.getPlayers()[game.getCurrentPlayer()].getSessionId(), game.getId(), "your-turn", true);
 	}
 

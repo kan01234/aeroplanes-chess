@@ -6,6 +6,17 @@ public class Player {
 	int color;
 	String sessionId;
 
+	public Player() {
+		super();
+	}
+
+	public Player(String name, int color, String sessionId) {
+		super();
+		this.name = name;
+		this.color = color;
+		this.sessionId = sessionId;
+	}
+
 	public String getName() {
 		return name;
 	}

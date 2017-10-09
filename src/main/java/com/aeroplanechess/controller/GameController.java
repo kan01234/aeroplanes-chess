@@ -41,12 +41,12 @@ public class GameController {
 		return request.getSession().getId();
 	}
 
-	@MessageMapping("/join/{gameId}")
-	public void join(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId) {
+	@MessageMapping("/join/{gameId}/{name}")
+	public void join(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @DestinationVariable(value = "name") String name) {
 		if (gameId.equals("null")) {
-			gameService.addPlayer(sessionId);
+			gameService.addPlayer(sessionId, name);
 		} else {
-			gameService.addPlayer(sessionId, gameId);
+			gameService.addPlayer(sessionId, gameId, name);
 		}
 		// gameService.checkStart();
 	}

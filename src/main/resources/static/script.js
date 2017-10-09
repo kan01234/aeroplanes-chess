@@ -120,7 +120,7 @@ window.addEventListener('load', () => {
 	drawCanvas(board, boardChess);
 })
 
-var join = () => {
+var join = (name) => {
 	sockjs = new SockJS('/aeroplanechess-websocket'),
 	stompClient = Stomp.over(sockjs);
 
@@ -145,17 +145,19 @@ var join = () => {
 				appendSystemMessage('Error, the game is full or not existing in waiting game list.')
 				return;
 			}
+			index = res.index + 1;
 			joined();
 		});
 
-		stompClient.send(`/app/join/${gameId}`);
+		stompClient.send(`/app/join/${gameId}/${name}`);
 	});
 }
 
 var start = () => {
-	join();
+	var name = document.getElementById('name').value
+	join(name);
 	document.getElementById('board-mask').style.display = 'none';
-	appendSystemMessage(`Welcome ${document.getElementById('name').value}!`);
+	appendSystemMessage(`Welcome ${name}!`);
 	appendSystemMessage('Waiting player to join...');
 }
 
@@ -261,17 +263,18 @@ var drawCanvas = (canvas, canvas_top) => {
 
 var joined = () => {
 	stompClient.subscribe(`/game/${gameId}/player-list`, function(res) {
-		// TODO show player name, null player as leaved or empty?
-		var players = JSON.parse(res.body).players;
+		var name,
+			player,
+			players = JSON.parse(res.body).players;
+
 		for(var i in players) {
-			var player = players[i];
+			player = players[i];
 			if(player == null)
-				continue;
-			var name = player.name;
-			if(sessionId == player.sessionId) {
-				name += " (You)";
-				index = Number(i) + 1;
-				console.log(index);
+				name = '(empty)';
+			else {
+				name = player.name;
+				if(sessionId == player.sessionId)
+					name += " (You)";
 			}
 			document.getElementById(`p${Number(i) + 1}-info-name`).innerHTML = name;
 		}
@@ -281,14 +284,16 @@ var joined = () => {
 		var body = JSON.parse(res.body);
 		if (index === (body.current + 1)) {
 			appendSystemMessage(`You: \t roll ${body.roll}`);
-			// TODO change to subscribe /game/move-${sessionId}
-			appendSystemMessage('Choose a chess to move!', system_alert_color);
 		} else {
 			appendSystemMessage(`Player ${body.current + 1}: \t roll ${body.roll}`);
 		}
 		clearInterval(diceInterval);
+		dice.innerHTML = dices[Number(body.roll) - 1];
+	});
+	
+	stompClient.subscribe(`/game/${gameId}/move-${sessionId}`, function(res) {
+		appendSystemMessage('Choose a chess to move!', system_alert_color);
 		countDown(() => {
-			console.log(index);
 			Array.from(document.getElementById(`p${index}`).getElementsByClassName('chess')).every((element) => {
 				if (!element.disaled) {
 					element.click();
@@ -296,13 +301,7 @@ var joined = () => {
 				}
 			})
 		})
-		dice.innerHTML = dices[Number(body.roll) - 1];
 	});
-
-	/*
-	 * stompClient.subscribe("/game/move-" + sessionId, function(res) {
-	 * console.log("pls select a aeroplane to move"); });
-	 */
 
 	stompClient.subscribe(`/game/${gameId}/move-result`, function(res) {
 		appendSystemMessage('System: \t Moved');
@@ -310,13 +309,13 @@ var joined = () => {
 		ctx_top.clearRect(0, 0, boardChess.width, boardChess.height);
 		infoDisabled(true);
 		if(!res.leaved) {
-			// TODO show message for leaved player, somthing like player X leaved, all of the planes of Color backed to the base?
 			countDown(() => {
 				console.log(document.getElementById('roll'));
 				if(!document.getElementById('roll').disabled)
 					document.getElementById('roll').click();
 			});
-		}
+		} else
+			appendSystemMessage(`${colors[res.leaved]} leave the game, all of the aeroplanes of that player back to the base.`);
 		var aeroplanes = JSON.parse(res.body).aeroplanes,
 			colorCount = -1,
 			player, player_flow, player_chess, player_pos;
@@ -384,8 +383,7 @@ var joined = () => {
 	stompClient.subscribe(`/game/${gameId}/won`, function(res) {
 		// TODO show the game is end, all disable
 		body = JSON.parse(res.body);
-		console.log(body);
-		appendSystemMessage(`${colors[body.currentPlayer]}`);
+		appendSystemMessage(`${colors[body['player-won']]} has won the game!!!`);
 	});
 
 	stompClient.send(`/app/ready/${gameId}`);
