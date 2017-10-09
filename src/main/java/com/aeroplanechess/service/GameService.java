@@ -83,7 +83,7 @@ public class GameService {
 	}
 
 	public synchronized String addPlayer(String sessionId, String gameId, String name) {
-		logger.info("addPlayer, sessionId: " + sessionId + ", gameId: " + gameId);
+		logger.info("addPlayer, sessionId: " + sessionId + ", gameId: " + gameId + ", name: " + name);
 		if (waitingGames.containsKey(gameId))
 			return addPlayer(sessionId, name, waitingGames.get(gameId));
 		else
@@ -92,7 +92,7 @@ public class GameService {
 	}
 
 	synchronized String addPlayer(String sessionId, String name, Game game) {
-		logger.info("addPlayer, sessionId: " + sessionId + ", game: " + game);
+		logger.info("addPlayer, sessionId: " + sessionId + ", game: " + game + ", name: " + name);
 		if (game == null)
 			return null;
 
@@ -110,7 +110,7 @@ public class GameService {
 
 		gameId = game.getId();
 		playerGameMap.put(sessionId, gameId);
-		messagingService.sendTo("joined", sessionId, new String[] { "error", "game-id", "index" }, new Object[] { false, game.getId(), i });
+		messagingService.sendTo("joined", sessionId, new String[] { "error", "game-id", "index" }, new Object[] { false, gameId, i });
 		return gameId;
 	}
 
