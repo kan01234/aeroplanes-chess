@@ -60,7 +60,6 @@ public class MoveUtils {
 			}
 		}
 
-		// TODO review here
 		if (!encountered.isEmpty()) {
 			if (encountered.size() > 1) {
 				destPrefix = CellPrefix.Base.getPrefix();
