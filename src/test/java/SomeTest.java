@@ -5,9 +5,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.aeroplanechess.builder.GameBuilder;
 import com.aeroplanechess.config.AppConfig;
 import com.aeroplanechess.utils.DiceUtils;
-import com.aeroplanechess.utils.GameBuilder;
 
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)

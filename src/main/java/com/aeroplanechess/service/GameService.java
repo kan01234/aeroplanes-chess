@@ -1,6 +1,5 @@
 package com.aeroplanechess.service;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -8,11 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.aeroplanechess.enums.CellPrefix;
+import com.aeroplanechess.builder.GameBuilder;
 import com.aeroplanechess.model.Aeroplane;
 import com.aeroplanechess.model.Game;
 import com.aeroplanechess.model.Player;
-import com.aeroplanechess.utils.GameBuilder;
 import com.aeroplanechess.utils.GameUtils;
 
 @Service
@@ -135,12 +133,8 @@ public class GameService {
 				Map<String, Boolean> readyMap = game.getReadyMap();
 				readyMap.remove(sessionId);
 				if (readyMap.size() == 1) {
-					int j = 0;
-					for (; j < players.length; j++)
-						if (players[j] != null)
-							break;
 					playingGames.remove(gameId);
-					messagingService.send("won", gameId, "player-won", j);
+					messagingService.send("won", gameId, "player-won", gameUtils.lastPlayerIndex(players));
 				}
 				break;
 			}
@@ -194,7 +188,7 @@ public class GameService {
 		aeroplanes = gameUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
 		messagingService.send("move-result", gameId, "aeroplanes", aeroplanes);
 		// check win
-		if (isWin(aeroplanes, currentPlayer)) {
+		if (gameUtils.isWin(aeroplanes, currentPlayer)) {
 			playingGames.remove(gameId);
 			messagingService.send("won", gameId, "player-won", currentPlayer);
 		} else {
@@ -224,18 +218,6 @@ public class GameService {
 		}
 
 		messagingService.sendTo("your-turn", game.getPlayers()[game.getCurrentPlayer()].getSessionId(), game.getId(), "your-turn", true);
-	}
-
-	boolean isWin(Aeroplane[] aeroplanes, int currentPlayer) {
-		logger.info("isWin, aeroplanes: " + Arrays.toString(aeroplanes) + ", currentPlayer: " + currentPlayer);
-		int count = 0;
-		for (int i = currentPlayer * 4; i < i + 4; i++) {
-			if (aeroplanes[i].getInCellId().substring(0, 2).equals(CellPrefix.Goal.getPrefix()))
-				count++;
-			else
-				break;
-		}
-		return count == 4;
 	}
 
 	boolean isPlayingGame(String gameId) {

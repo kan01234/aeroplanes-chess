@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.aeroplanechess.builder.GameBuilder;
 import com.aeroplanechess.model.Game;
 import com.aeroplanechess.utils.DiceUtils;
-import com.aeroplanechess.utils.GameBuilder;
 import com.aeroplanechess.utils.GameUtils;
 import com.aeroplanechess.utils.MoveUtils;
 

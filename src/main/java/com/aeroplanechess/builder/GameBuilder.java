@@ -1,4 +1,4 @@
-package com.aeroplanechess.utils;
+package com.aeroplanechess.builder;
 
 import java.util.UUID;
 
