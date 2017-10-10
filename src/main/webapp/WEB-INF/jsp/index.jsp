@@ -8,16 +8,6 @@
 <body>
 	<div class="wrapper-header">
 		<h1 id="title">Aeroplane Chess</h1>
-		<div class="wrapper-contact">
-			<a class="contact-email" href="mailto:dotter.bear@gmail.com?subject=Aeroplanes Chess - Feedback">
-				<img src="image/ic_mail_outline_black_24dp/web/ic_mail_outline_black_24dp_1x.png">
-				<span>dotter.bear@gmail.com</span>
-			</a>
-			<a class="contact-github" href="https://github.com/dotterbear/aeroplanes-chess.git" target=_blank>
-				<img src="image/GitHub-Mark/PNG/GitHub-Mark-32px.png">
-				<span>aeroplanes-chess</span>
-			</a>
-		</div>
 	</div>
 	<div id="board-mask">
 		<form id="board-main" action="javascript:start()">
