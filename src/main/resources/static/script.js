@@ -130,19 +130,20 @@ var join = (name) => {
 		sessionId = /\/([^\/]+)\/websocket/.exec(sockjs._transport.url)[1];
 		console.log("connected, session id: " + sessionId);
 
-		// TODO review error handling
 		stompClient.subscribe(`/game/${gameId}/error`, function(res) {
 			var body = JSON.parse(res.body)
-			console.log(body);
-			appendSystemMessage(`Error, ${body.message}`);
+			appendSystemMessage(`Error - ${body.message}!`, system_alert_color);
+			appendSystemMessage(`Please refresh to try again!`, system_alert_color);
+			end();
 		});
 
 		stompClient.subscribe(`/game/joined-${sessionId}`, function(res) {
 			res = JSON.parse(res.body);
 			gameId = res["game-id"];
 			if(res.error) {
-				// TODO review error handling
-				appendSystemMessage('Error, the game is full or not existing in waiting game list.')
+				appendSystemMessage('Error, the game is full or not existing in waiting game list.', system_alert_color);
+				appendSystemMessage(`Please refresh to try again!`, system_alert_color);
+				end();
 				return;
 			}
 			index = res.index + 1;
@@ -159,6 +160,15 @@ var start = () => {
 	document.getElementById('board-mask').style.display = 'none';
 	appendSystemMessage(`Welcome ${name}!`);
 	appendSystemMessage('Waiting player to join...');
+}
+
+var end = () => {
+	clearInterval(diceInterval);
+	clearInterval(countDownInterval);
+	if (stompClient)
+		stompClient.disconnect(() => {
+			console.log('disconnected');
+		})
 }
 
 var resizeCanvas = (canvas) => {
@@ -379,11 +389,11 @@ var joined = () => {
 		infoDisabled(false);
 		elementlDisabled('roll', false);
 	});
-	
+
 	stompClient.subscribe(`/game/${gameId}/won`, function(res) {
-		// TODO show the game is end, all disable
 		body = JSON.parse(res.body);
-		appendSystemMessage(`${colors[body['player-won']]} has won the game!!!`);
+		appendSystemMessage(`Congratulation! ${colors[body['player-won']]} has won the game!!!`, system_alert_color);
+		end();
 	});
 
 	stompClient.send(`/app/ready/${gameId}`);
