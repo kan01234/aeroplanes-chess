@@ -51,6 +51,20 @@ body {
 	vertical-align: top;
 }
 
+#game-id {
+	bottom: 5px;
+	color: #1520ffb3;
+	left: 5px;
+	position: absolute;
+}
+#game-id:hover {
+	cursor: pointer;
+	opacity: 0.5;
+}
+#game-id:active {
+	opacity: 1;
+}
+
 #background, #background-mask {
 	background-image: url('/image/background2.jpg');
 	background-repeat: no-repeat;

@@ -140,6 +140,11 @@ var join = (name) => {
 		stompClient.subscribe(`/game/joined-${sessionId}`, function(res) {
 			res = JSON.parse(res.body);
 			gameId = res["game-id"];
+			document.getElementById('game-id').innerHTML = `#${gameId} <- Click to Copy!`;
+			document.getElementById('game-id').addEventListener('click', () => {
+				console.log(gameId);
+				//TODO: copy function
+			})
 			if(res.error) {
 				appendSystemMessage('Error, the game is full or not existing in waiting game list.', system_alert_color);
 				appendSystemMessage(`Please refresh to try again!`, system_alert_color);

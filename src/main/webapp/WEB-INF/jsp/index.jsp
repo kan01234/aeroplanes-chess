@@ -9,6 +9,7 @@
 	<div class="wrapper-header">
 		<h1 id="title">Aeroplane Chess</h1>
 	</div>
+	<div id="game-id"></div>
 	<div id="board-mask">
 		<form id="board-main" action="javascript:start()">
 			<input id="name" type="text" placeholder="N A M E" required maxlength="6" />
