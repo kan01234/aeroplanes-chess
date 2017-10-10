@@ -11,24 +11,17 @@ import com.aeroplanechess.builder.GameBuilder;
 import com.aeroplanechess.model.Aeroplane;
 import com.aeroplanechess.model.Game;
 import com.aeroplanechess.model.Player;
+import com.aeroplanechess.repository.GameRepository;
 import com.aeroplanechess.utils.GameUtils;
 
 @Service
+// TODO remove player id before remove game
 public class GameService {
 
-	// TODO move to redis ?
-	@Autowired
-	Map<String, Game> waitingGames;
-
-	// TODO move to redis ?
-	@Autowired
-	Map<String, Game> playingGames;
-
-	// TODO move to redis ?
-	@Autowired
-	Map<String, String> playerGameMap;
-
 	Logger logger = LoggerFactory.getLogger(GameService.class);
+
+	@Autowired
+	GameRepository gameRepository;
 
 	@Autowired
 	MessagingService messagingService;
@@ -41,10 +34,12 @@ public class GameService {
 
 	public void roll(String sessionId, String gameId) {
 		logger.info("roll, sessionId: " + sessionId + ", gameId: " + gameId);
-		if (!isPlayingGame(gameId))
+
+		Game game = gameRepository.getPlayingGame(gameId);
+
+		if (game == null)
 			return;
 
-		Game game = playingGames.get(gameId);
 		int rollResult = gameUtils.roll();
 
 		// send roll result to all players
@@ -59,15 +54,16 @@ public class GameService {
 		}
 	}
 
-	public synchronized String addPlayer(String sessionId, String name) {
+	public String addPlayer(String sessionId, String name) {
 		logger.info("addPlayer, sessionId: " + sessionId);
+		Map<String, Game> waitingGameMap = gameRepository.getWaitingGameMap();
 		Game game = null;
-		if (waitingGames.isEmpty()) {
+		if (waitingGameMap.isEmpty()) {
 			game = gameBuilder.build();
-			waitingGames.put(game.getId(), game);
+			waitingGameMap.put(game.getId(), game);
 		} else {
-			for (Game g : waitingGames.values()) {
-				if (!g.isFull()) {
+			for (Game g : waitingGameMap.values()) {
+				if (g.getJoinCount().incrementAndGet() <= 4) {
 					game = g;
 					break;
 				}
@@ -76,16 +72,17 @@ public class GameService {
 		return addPlayer(sessionId, name, game);
 	}
 
-	public synchronized String addPlayer(String sessionId, String gameId, String name) {
+	public String addPlayer(String sessionId, String gameId, String name) {
 		logger.info("addPlayer, sessionId: " + sessionId + ", gameId: " + gameId + ", name: " + name);
-		if (waitingGames.containsKey(gameId))
-			return addPlayer(sessionId, name, waitingGames.get(gameId));
+		Game game = gameRepository.getWaitingGame(gameId);
+		if (game != null && game.getJoinCount().incrementAndGet() <= 4)
+			return addPlayer(sessionId, name, game);
 		else
 			messagingService.sendTo("joined", sessionId, "error", true);
 		return null;
 	}
 
-	synchronized String addPlayer(String sessionId, String name, Game game) {
+	String addPlayer(String sessionId, String name, Game game) {
 		logger.info("addPlayer, sessionId: " + sessionId + ", game: " + game + ", name: " + name);
 		if (game == null)
 			return null;
@@ -96,30 +93,32 @@ public class GameService {
 		for (; i < players.length; i++) {
 			if (players[i] == null) {
 				players[i] = new Player(name, i, sessionId);
-				if (i == players.length - 1)
-					game.setFull(true);
 				break;
 			}
 		}
 
 		gameId = game.getId();
-		playerGameMap.put(sessionId, gameId);
+		gameRepository.getPlayerGameMap().put(sessionId, gameId);
 		messagingService.sendTo("joined", sessionId, new String[] { "error", "game-id", "index" }, new Object[] { false, gameId, i });
 		return gameId;
 	}
 
 	public void removePlayer(String sessionId) {
 		logger.info("removePlayer, sessionId: " + sessionId);
+		Map<String, String> playerGameMap = gameRepository.getPlayerGameMap();
+
 		if (!playerGameMap.containsKey(sessionId))
 			return;
 
 		String gameId = playerGameMap.get(sessionId);
-		playerGameMap.remove(sessionId);
-		if (waitingGames.containsKey(gameId)) {
-			removePlayer(sessionId, waitingGames.get(gameId), true);
-		} else if (playingGames.containsKey(gameId)) {
-			removePlayer(sessionId, playingGames.get(gameId), false);
+		Game game = gameRepository.getWaitingGame(gameId);
+		boolean isWaiting = true;
+		if (game == null) {
+			game = gameRepository.getPlayingGame(gameId);
+			isWaiting = false;
 		}
+		playerGameMap.remove(sessionId);
+		removePlayer(sessionId, game, isWaiting);
 	}
 
 	void removePlayer(String sessionId, Game game, boolean isWaiting) {
@@ -130,19 +129,18 @@ public class GameService {
 		for (i = 0; i < players.length; i++) {
 			if (players[i] != null && players[i].getSessionId().equals(sessionId)) {
 				players[i] = null;
-				Map<String, Boolean> readyMap = game.getReadyMap();
-				readyMap.remove(sessionId);
-				if (readyMap.size() == 1) {
-					playingGames.remove(gameId);
-					messagingService.send("won", gameId, "player-won", gameUtils.lastPlayerIndex(players));
-				}
 				break;
 			}
 		}
 
 		if (isWaiting)
-			game.setFull(false);
+			game.getJoinCount().decrementAndGet();
 		else {
+			if (game.getReadyCount().decrementAndGet() == 1) {
+				gameRepository.removePlayingGame(gameId);
+				messagingService.send("won", gameId, "player-won", gameUtils.lastPlayerIndex(players));
+				return;
+			}
 			gameUtils.allBackToBase(game.getAeroplanes(), i);
 			messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), i, i });
 			if (i == game.getCurrentPlayer())
@@ -159,17 +157,14 @@ public class GameService {
 
 	public void ready(String sessionId, String gameId) {
 		logger.info("ready, sessionId: " + sessionId + " , gam");
-		if (!isWaitingGame(gameId)) {
-			isWaitingGame(gameId);
+		Game game = gameRepository.getWaitingGame(gameId);
+
+		if (game == null)
 			return;
-		}
-		Game game = waitingGames.get(gameId);
+
 		messagingService.send("player-list", gameId, "players", game.getPlayers());
-		Map<String, Boolean> readyMap = game.getReadyMap();
-		readyMap.put(sessionId, true);
-		if (readyMap.size() == 4) {
-			waitingGames.remove(gameId);
-			playingGames.put(gameId, game);
+		if (game.getReadyCount().incrementAndGet() == 4) {
+			gameRepository.addPlayingGame(gameId, gameRepository.removeWaitingGame(gameId));
 			messagingService.send("start", gameId, "start", true);
 			nextTurn(game, false);
 		}
@@ -177,10 +172,11 @@ public class GameService {
 
 	public void move(String sessionId, String gameId, int aeroplaneIndex) {
 		logger.info("move, sessionId: " + sessionId + ", gameId: " + gameId + ", aeroplaneIndex: " + aeroplaneIndex);
-		if (!isPlayingGame(gameId))
+		Game game = gameRepository.getPlayingGame(gameId);
+
+		if (game == null)
 			return;
 
-		Game game = playingGames.get(gameId);
 		int rollResult = game.getLastRoll();
 		int currentPlayer = game.getCurrentPlayer();
 		Aeroplane[] aeroplanes = game.getAeroplanes();
@@ -189,7 +185,7 @@ public class GameService {
 		messagingService.send("move-result", gameId, "aeroplanes", aeroplanes);
 		// check win
 		if (gameUtils.isWin(aeroplanes, currentPlayer)) {
-			playingGames.remove(gameId);
+			gameRepository.removePlayingGame(gameId);
 			messagingService.send("won", gameId, "player-won", currentPlayer);
 		} else {
 			nextTurn(game, rollResult == 6);
@@ -218,30 +214,6 @@ public class GameService {
 		}
 
 		messagingService.sendTo("your-turn", game.getPlayers()[game.getCurrentPlayer()].getSessionId(), game.getId(), "your-turn", true);
-	}
-
-	boolean isPlayingGame(String gameId) {
-		if (!playingGames.containsKey(gameId)) {
-			messagingService.send("error", gameId, "message", "game not found in playing games list!!!");
-			return false;
-		}
-		return true;
-	}
-
-	boolean isWaitingGame(String gameId) {
-		if (!waitingGames.containsKey(gameId)) {
-			messagingService.send("error", gameId, "message", "game not found in waiting games list!!!");
-			return false;
-		}
-		return true;
-	}
-
-	public Map<String, Game> getWaitingGames() {
-		return waitingGames;
-	}
-
-	public Map<String, Game> getPlayingGames() {
-		return playingGames;
 	}
 
 }

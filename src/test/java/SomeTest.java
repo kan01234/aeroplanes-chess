@@ -1,13 +1,16 @@
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.aeroplanechess.builder.GameBuilder;
 import com.aeroplanechess.config.AppConfig;
-import com.aeroplanechess.utils.DiceUtils;
+import com.aeroplanechess.utils.GameUtils;
 
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -18,11 +21,21 @@ public class SomeTest {
 	GameBuilder gameBuilder;
 
 	@Autowired
-	DiceUtils diceUtils;
+	GameUtils gameUtils;
+
+	@Value(value = "${game.config.dice.min}")
+	int diceMin;
+
+	@Value(value = "${game.config.dice.max}")
+	int diceMax;
 
 	@Test
-	public void buildGame() {
-		System.out.println(gameBuilder.build().toString());
+	public void roll() {
+		int roll;
+		for (int i = 0; i < 100; i++) {
+			roll = gameUtils.roll();
+			assertTrue(roll >= diceMin && roll <= diceMax);
+		}
 	}
 
 }

@@ -3,6 +3,7 @@ package com.aeroplanechess.model;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Game {
 
@@ -12,7 +13,8 @@ public class Game {
 	int currentPlayer = -1;
 	int continued = 0;
 	Map<String, Boolean> readyMap = new HashMap<String, Boolean>();
-	boolean full = false;
+	AtomicInteger readyCount = new AtomicInteger(0);
+	AtomicInteger joinCount = new AtomicInteger(0);
 	Aeroplane[] aeroplanes;
 	TaskQueueRunner taskQueueRunner = new TaskQueueRunner();
 
@@ -64,14 +66,6 @@ public class Game {
 		this.continued = continued;
 	}
 
-	public boolean isFull() {
-		return full;
-	}
-
-	public void setFull(boolean full) {
-		this.full = full;
-	}
-
 	public Map<String, Boolean> getReadyMap() {
 		return readyMap;
 	}
@@ -80,13 +74,37 @@ public class Game {
 		this.readyMap = readyMap;
 	}
 
+	public AtomicInteger getReadyCount() {
+		return readyCount;
+	}
+
+	public void setReadyCount(AtomicInteger readyCount) {
+		this.readyCount = readyCount;
+	}
+
+	public AtomicInteger getJoinCount() {
+		return joinCount;
+	}
+
+	public void setJoinCount(AtomicInteger joinCount) {
+		this.joinCount = joinCount;
+	}
+
+	public TaskQueueRunner getTaskQueueRunner() {
+		return taskQueueRunner;
+	}
+
+	public void setTaskQueueRunner(TaskQueueRunner taskQueueRunner) {
+		this.taskQueueRunner = taskQueueRunner;
+	}
+
 	public void addTask(Runnable runnable) {
 		taskQueueRunner.add(runnable);
 	}
 
 	@Override
 	public String toString() {
-		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", currentPlayer=" + currentPlayer + ", continued=" + continued + ", readyMap=" + readyMap + ", full=" + full + ", aeroplanes=" + Arrays.toString(aeroplanes) + "]";
+		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", currentPlayer=" + currentPlayer + ", continued=" + continued + ", readyMap=" + readyMap + ", readyCount=" + readyCount + ", aeroplanes=" + Arrays.toString(aeroplanes) + ", taskQueueRunner=" + taskQueueRunner + "]";
 	}
 
 }

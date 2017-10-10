@@ -12,6 +12,7 @@ import com.aeroplanechess.model.Game;
 import com.aeroplanechess.utils.DiceUtils;
 import com.aeroplanechess.utils.GameUtils;
 import com.aeroplanechess.utils.MoveUtils;
+import com.aeroplanechess.utils.WinUtils;
 
 @Configuration
 public class AppConfig {
@@ -19,7 +20,7 @@ public class AppConfig {
 	@Value(value = "${game.config.dice.min}")
 	int diceMin;
 
-	@Value(value = "${game.config.dice.min}")
+	@Value(value = "${game.config.dice.max}")
 	int diceMax;
 
 	@Bean(name = "playerGameMap")
@@ -27,13 +28,13 @@ public class AppConfig {
 		return new ConcurrentHashMap<String, String>();
 	}
 
-	@Bean(name = "playingGames")
-	public Map<String, Game> getPlayingGame() {
+	@Bean(name = "playingGameMap")
+	public Map<String, Game> getPlayingGameMap() {
 		return new ConcurrentHashMap<String, Game>();
 	}
 
-	@Bean(name = "waitingGames")
-	public Map<String, Game> getWaitingGames() {
+	@Bean(name = "waitingGameMap")
+	public Map<String, Game> getWaitingGameMap() {
 		return new ConcurrentHashMap<String, Game>();
 	}
 
@@ -45,6 +46,11 @@ public class AppConfig {
 	@Bean
 	public MoveUtils getMoveUtils() {
 		return new MoveUtils();
+	}
+
+	@Bean
+	public WinUtils getWinUtils() {
+		return new WinUtils();
 	}
 
 	@Bean
