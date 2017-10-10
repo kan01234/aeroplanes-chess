@@ -392,7 +392,11 @@ var joined = () => {
 
 	stompClient.subscribe(`/game/${gameId}/won`, function(res) {
 		body = JSON.parse(res.body);
-		appendSystemMessage(`Congratulation! ${colors[body['player-won']]} has won the game!!!`, system_alert_color);
+		appendSystemMessage(`Player ${Number(body['player-won'])} won the game!`, system_alert_color);
+		if ((Number(body['player-won']) + 1) === index)
+			appendSystemMessage(`Congratulation! You win!`, system_alert_color);
+		else
+			appendSystemMessage(`You lose!`, system_alert_color);
 		end();
 	});
 
