@@ -58,4 +58,8 @@ public class GameRepository {
 		return waitingGameMap.put(gameId, game);
 	}
 
+	public String removePlayer(String sessionId) {
+		return playerGameMap.remove(sessionId);
+	}
+
 }

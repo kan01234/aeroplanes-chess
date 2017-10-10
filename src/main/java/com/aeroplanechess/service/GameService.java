@@ -33,25 +33,140 @@ public class GameService {
 	GameUtils gameUtils;
 
 	public void roll(String sessionId, String gameId) {
-		logger.info("roll, sessionId: " + sessionId + ", gameId: " + gameId);
 
 		Game game = gameRepository.getPlayingGame(gameId);
 
 		if (game == null)
 			return;
 
-		int rollResult = gameUtils.roll();
+		game.addTask(new Runnable() {
 
-		// send roll result to all players
-		game.setLastRoll(rollResult);
-		messagingService.send("roll-result", game.getId(), new String[] { "roll", "current" }, new Object[] { rollResult, game.getCurrentPlayer() });
+			@Override
+			public void run() {
+				logger.info("roll, sessionId: " + sessionId + ", gameId: " + gameId);
 
-		// send move notification to current player
-		if (rollResult == 6 && game.getContinued() == 2) {
-			thridSix(game);
-		} else {
-			messagingService.sendTo("move", sessionId, gameId, "move", true);
+				int rollResult = gameUtils.roll();
+
+				// send roll result to all players
+				game.setLastRoll(rollResult);
+				messagingService.send("roll-result", game.getId(), new String[] { "roll", "current" }, new Object[] { rollResult, game.getCurrentPlayer() });
+
+				// send move notification to current player
+				if (rollResult == 6 && game.getContinued() == 2) {
+					thridSix(game);
+				} else {
+					messagingService.sendTo("move", sessionId, gameId, "move", true);
+				}
+			}
+
+		});
+	}
+
+	public void move(String sessionId, String gameId, int aeroplaneIndex) {
+		Game game = gameRepository.getPlayingGame(gameId);
+
+		if (game == null)
+			return;
+
+		game.addTask(new Runnable() {
+
+			@Override
+			public void run() {
+				logger.info("move, sessionId: " + sessionId + ", gameId: " + gameId + ", aeroplaneIndex: " + aeroplaneIndex);
+
+				int rollResult = game.getLastRoll();
+				int currentPlayer = game.getCurrentPlayer();
+				Aeroplane[] aeroplanes = game.getAeroplanes();
+				// move
+				aeroplanes = gameUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
+				messagingService.send("move-result", gameId, "aeroplanes", aeroplanes);
+				// check win
+				if (gameUtils.isWin(aeroplanes, currentPlayer)) {
+					gameRepository.removePlayingGame(gameId);
+					messagingService.send("won", gameId, "player-won", currentPlayer);
+				} else {
+					nextTurn(game, rollResult == 6);
+				}
+			}
+
+		});
+	}
+
+	void thridSix(Game game) {
+		logger.info("thridSix, game: " + game);
+		gameUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayer());
+		messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { game.getAeroplanes(), true });
+		nextTurn(game, false);
+	}
+
+	void nextTurn(Game game, boolean isContinue) {
+		logger.info("nextTurn, game:" + game + ", isContinue: " + isContinue);
+		if (isContinue)
+			game.setContinued(game.getContinued() + 1);
+		else {
+			int currentPlayer = game.getCurrentPlayer();
+			do
+				currentPlayer = ++currentPlayer % 4;
+			while (game.getPlayers()[currentPlayer] == null);
+			game.setCurrentPlayer(currentPlayer);
+			game.setContinued(0);
 		}
+
+		messagingService.sendTo("your-turn", game.getPlayers()[game.getCurrentPlayer()].getSessionId(), game.getId(), "your-turn", true);
+	}
+
+	public void removePlayer(String sessionId) {
+		logger.info("removePlayer, sessionId: " + sessionId);
+		Map<String, String> playerGameMap = gameRepository.getPlayerGameMap();
+
+		if (!playerGameMap.containsKey(sessionId))
+			return;
+
+		String gameId = playerGameMap.get(sessionId);
+		Game game = gameRepository.getWaitingGame(gameId);
+		boolean isWaiting = true;
+		if (game == null) {
+			game = gameRepository.getPlayingGame(gameId);
+			isWaiting = false;
+		}
+		removePlayer(sessionId, game, isWaiting);
+	}
+
+	void removePlayer(String sessionId, Game game, boolean isWaiting) {
+		game.addTask(new Runnable() {
+
+			@Override
+			public void run() {
+				logger.info("removePlayer, sessionId: " + sessionId + ", game: " + game + ", isWaiting: " + isWaiting);
+				gameRepository.removePlayer(sessionId);
+				Player[] players = game.getPlayers();
+				String gameId = game.getId();
+				int i;
+				for (i = 0; i < players.length; i++) {
+					if (players[i] != null && players[i].getSessionId().equals(sessionId)) {
+						players[i] = null;
+						break;
+					}
+				}
+
+				if (isWaiting) {
+					if (game.getReadyCount().get() > game.getJoinCount().decrementAndGet())
+						game.getReadyCount().decrementAndGet();
+				} else {
+					if (game.getReadyCount().decrementAndGet() == 1) {
+						gameRepository.removePlayingGame(gameId);
+						messagingService.send("won", gameId, "player-won", gameUtils.lastPlayerIndex(players));
+						return;
+					}
+					gameUtils.allBackToBase(game.getAeroplanes(), i);
+					messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), i, i });
+					if (i == game.getCurrentPlayer())
+						nextTurn(game, false);
+				}
+				messagingService.send("player-list", game.getId(), "players", players);
+			}
+
+		});
 	}
 
 	public String addPlayer(String sessionId, String name) {
@@ -103,54 +218,8 @@ public class GameService {
 		return gameId;
 	}
 
-	public void removePlayer(String sessionId) {
-		logger.info("removePlayer, sessionId: " + sessionId);
-		Map<String, String> playerGameMap = gameRepository.getPlayerGameMap();
-
-		if (!playerGameMap.containsKey(sessionId))
-			return;
-
-		String gameId = playerGameMap.get(sessionId);
-		Game game = gameRepository.getWaitingGame(gameId);
-		boolean isWaiting = true;
-		if (game == null) {
-			game = gameRepository.getPlayingGame(gameId);
-			isWaiting = false;
-		}
-		playerGameMap.remove(sessionId);
-		removePlayer(sessionId, game, isWaiting);
-	}
-
-	void removePlayer(String sessionId, Game game, boolean isWaiting) {
-		logger.info("removePlayer, sessionId: " + sessionId + ", game: " + game + ", isWaiting: " + isWaiting);
-		Player[] players = game.getPlayers();
-		String gameId = game.getId();
-		int i;
-		for (i = 0; i < players.length; i++) {
-			if (players[i] != null && players[i].getSessionId().equals(sessionId)) {
-				players[i] = null;
-				break;
-			}
-		}
-
-		if (isWaiting)
-			game.getJoinCount().decrementAndGet();
-		else {
-			if (game.getReadyCount().decrementAndGet() == 1) {
-				gameRepository.removePlayingGame(gameId);
-				messagingService.send("won", gameId, "player-won", gameUtils.lastPlayerIndex(players));
-				return;
-			}
-			gameUtils.allBackToBase(game.getAeroplanes(), i);
-			messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), i, i });
-			if (i == game.getCurrentPlayer())
-				nextTurn(game, false);
-		}
-		messagingService.send("player-list", game.getId(), "players", players);
-	}
-
-	void checkStart(Game game) {
-		logger.info("checkStart, game: " + game);
+	void start(Game game) {
+		logger.info("start, game: " + game);
 		messagingService.send("start", game.getId(), "start", true);
 		nextTurn(game, false);
 	}
@@ -169,51 +238,4 @@ public class GameService {
 			nextTurn(game, false);
 		}
 	}
-
-	public void move(String sessionId, String gameId, int aeroplaneIndex) {
-		logger.info("move, sessionId: " + sessionId + ", gameId: " + gameId + ", aeroplaneIndex: " + aeroplaneIndex);
-		Game game = gameRepository.getPlayingGame(gameId);
-
-		if (game == null)
-			return;
-
-		int rollResult = game.getLastRoll();
-		int currentPlayer = game.getCurrentPlayer();
-		Aeroplane[] aeroplanes = game.getAeroplanes();
-		// move
-		aeroplanes = gameUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
-		messagingService.send("move-result", gameId, "aeroplanes", aeroplanes);
-		// check win
-		if (gameUtils.isWin(aeroplanes, currentPlayer)) {
-			gameRepository.removePlayingGame(gameId);
-			messagingService.send("won", gameId, "player-won", currentPlayer);
-		} else {
-			nextTurn(game, rollResult == 6);
-		}
-	}
-
-	void thridSix(Game game) {
-		logger.info("thridSix, game: " + game);
-		gameUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayer());
-		messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { game.getAeroplanes(), true });
-		nextTurn(game, false);
-	}
-
-	// maybe bug here?
-	void nextTurn(Game game, boolean isContinue) {
-		logger.info("nextTurn, game:" + game + ", isContinue: " + isContinue);
-		if (isContinue)
-			game.setContinued(game.getContinued() + 1);
-		else {
-			int currentPlayer = game.getCurrentPlayer();
-			do
-				currentPlayer = ++currentPlayer % 4;
-			while (game.getPlayers()[currentPlayer] == null);
-			game.setCurrentPlayer(currentPlayer);
-			game.setContinued(0);
-		}
-
-		messagingService.sendTo("your-turn", game.getPlayers()[game.getCurrentPlayer()].getSessionId(), game.getId(), "your-turn", true);
-	}
-
 }
