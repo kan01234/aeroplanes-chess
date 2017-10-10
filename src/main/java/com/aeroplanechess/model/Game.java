@@ -14,6 +14,7 @@ public class Game {
 	Map<String, Boolean> readyMap = new HashMap<String, Boolean>();
 	boolean full = false;
 	Aeroplane[] aeroplanes;
+	TaskQueueRunner taskQueueRunner = new TaskQueueRunner();
 
 	public String getId() {
 		return id;
@@ -77,6 +78,10 @@ public class Game {
 
 	public void setReadyMap(Map<String, Boolean> readyMap) {
 		this.readyMap = readyMap;
+	}
+
+	public void addTask(Runnable runnable) {
+		taskQueueRunner.add(runnable);
 	}
 
 	@Override
