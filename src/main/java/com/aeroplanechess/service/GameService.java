@@ -49,7 +49,7 @@ public class GameService {
 
 				// send roll result to all players
 				game.setLastRoll(rollResult);
-				messagingService.send("roll-result", game.getId(), new String[] { "roll", "current" }, new Object[] { rollResult, game.getCurrentPlayer() });
+				messagingService.send("roll-result", game.getId(), new String[] { "roll", "current" }, new Object[] { rollResult, game.getCurrentPlayerIndex() });
 
 				// send move notification to current player
 				if (rollResult == 6 && game.getContinued() == 2) {
@@ -75,7 +75,7 @@ public class GameService {
 				logger.info("move, sessionId: " + sessionId + ", gameId: " + gameId + ", aeroplaneIndex: " + aeroplaneIndex);
 
 				int rollResult = game.getLastRoll();
-				int currentPlayer = game.getCurrentPlayer();
+				int currentPlayer = game.getCurrentPlayerIndex();
 				Aeroplane[] aeroplanes = game.getAeroplanes();
 				// move
 				aeroplanes = gameUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
@@ -94,7 +94,7 @@ public class GameService {
 
 	void thridSix(Game game) {
 		logger.info("thridSix, game: " + game);
-		gameUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayer());
+		gameUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayerIndex());
 		messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { game.getAeroplanes(), true });
 		nextTurn(game, false);
 	}
@@ -104,15 +104,14 @@ public class GameService {
 		if (isContinue)
 			game.setContinued(game.getContinued() + 1);
 		else {
-			int currentPlayer = game.getCurrentPlayer();
+			Player[] players = game.getPlayers();
 			do
-				currentPlayer = ++currentPlayer % 4;
-			while (game.getPlayers()[currentPlayer] == null);
-			game.setCurrentPlayer(currentPlayer);
+				game.getTurnCount().incrementAndGet();
+			while (players[game.getCurrentPlayerIndex()] == null);
 			game.setContinued(0);
 		}
 
-		messagingService.sendTo("your-turn", game.getPlayers()[game.getCurrentPlayer()].getSessionId(), game.getId(), "your-turn", true);
+		messagingService.sendTo("your-turn", game.getPlayers()[game.getCurrentPlayerIndex()].getSessionId(), game.getId(), "your-turn", true);
 	}
 
 	public void removePlayer(String sessionId) {
@@ -160,7 +159,7 @@ public class GameService {
 					}
 					gameUtils.allBackToBase(game.getAeroplanes(), i);
 					messagingService.send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), i, i });
-					if (i == game.getCurrentPlayer())
+					if (i == game.getCurrentPlayerIndex())
 						nextTurn(game, false);
 				}
 				messagingService.send("player-list", game.getId(), "players", players);

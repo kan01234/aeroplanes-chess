@@ -1,8 +1,6 @@
 package com.aeroplanechess.model;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Game {
@@ -10,11 +8,10 @@ public class Game {
 	String id;
 	Player[] players;
 	int lastRoll = -1;
-	int currentPlayer = -1;
 	int continued = 0;
-	Map<String, Boolean> readyMap = new HashMap<String, Boolean>();
 	AtomicInteger readyCount = new AtomicInteger(0);
 	AtomicInteger joinCount = new AtomicInteger(0);
+	AtomicInteger turnCount = new AtomicInteger(-1);
 	Aeroplane[] aeroplanes;
 	TaskQueueRunner taskQueueRunner = new TaskQueueRunner();
 
@@ -34,12 +31,12 @@ public class Game {
 		this.players = players;
 	}
 
-	public int getCurrentPlayer() {
-		return currentPlayer;
+	public AtomicInteger getTurnCount() {
+		return turnCount;
 	}
 
-	public void setCurrentPlayer(int currentPlayer) {
-		this.currentPlayer = currentPlayer;
+	public void setTurnCount(AtomicInteger turnCount) {
+		this.turnCount = turnCount;
 	}
 
 	public int getLastRoll() {
@@ -64,14 +61,6 @@ public class Game {
 
 	public void setContinued(int continued) {
 		this.continued = continued;
-	}
-
-	public Map<String, Boolean> getReadyMap() {
-		return readyMap;
-	}
-
-	public void setReadyMap(Map<String, Boolean> readyMap) {
-		this.readyMap = readyMap;
 	}
 
 	public AtomicInteger getReadyCount() {
@@ -104,7 +93,11 @@ public class Game {
 
 	@Override
 	public String toString() {
-		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", currentPlayer=" + currentPlayer + ", continued=" + continued + ", readyMap=" + readyMap + ", readyCount=" + readyCount + ", aeroplanes=" + Arrays.toString(aeroplanes) + ", taskQueueRunner=" + taskQueueRunner + "]";
+		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", continued=" + continued + ", readyCount=" + readyCount + ", joinCount=" + joinCount + ", turnCount=" + turnCount + ", aeroplanes=" + Arrays.toString(aeroplanes) + ", taskQueueRunner=" + taskQueueRunner + "]";
+	}
+
+	public int getCurrentPlayerIndex() {
+		return turnCount.get() % 4;
 	}
 
 }
