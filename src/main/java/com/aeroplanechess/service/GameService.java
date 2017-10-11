@@ -22,6 +22,11 @@ public class GameService extends AbstractWebSocketService {
 	@Autowired
 	GameUtils gameUtils;
 
+	public void start(String gameId) {
+		send("start", gameId, "start", true);
+		nextTurn(gameRepository.addPlayingGame(gameId, gameRepository.removeWaitingGame(gameId)), false);
+	}
+
 	public void roll(String sessionId, String gameId) {
 		logger.info("roll, sessionId: " + sessionId + ", gameId: " + gameId);
 		Game game = gameRepository.getPlayingGame(gameId);

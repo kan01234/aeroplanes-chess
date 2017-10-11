@@ -119,11 +119,8 @@ public class PlayerService extends AbstractWebSocketService {
 		if (game == null)
 			return;
 		send("player-list", gameId, "players", game.getPlayers());
-		if (game.getReadyCount().incrementAndGet() == 4) {
-			gameRepository.addPlayingGame(gameId, gameRepository.removeWaitingGame(gameId));
-			send("start", gameId, "start", true);
-			gameService.nextTurn(game, false);
-		}
+		if (game.getReadyCount().incrementAndGet() == 4)
+			gameService.start(gameId);
 	}
 
 	Game newGame() {
