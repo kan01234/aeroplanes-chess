@@ -13,7 +13,7 @@ public class Game {
 	AtomicInteger joinCount = new AtomicInteger(0);
 	AtomicInteger turnCount = new AtomicInteger(-1);
 	Aeroplane[] aeroplanes;
-	TaskQueueRunner taskQueueRunner = new TaskQueueRunner();
+	// TaskQueueRunner taskQueueRunner = new TaskQueueRunner();
 
 	public String getId() {
 		return id;
@@ -79,25 +79,25 @@ public class Game {
 		this.joinCount = joinCount;
 	}
 
-	public TaskQueueRunner getTaskQueueRunner() {
-		return taskQueueRunner;
-	}
+	// public TaskQueueRunner getTaskQueueRunner() {
+	// return taskQueueRunner;
+	// }
+	//
+	// public void setTaskQueueRunner(TaskQueueRunner taskQueueRunner) {
+	// this.taskQueueRunner = taskQueueRunner;
+	// }
+	//
+	// public void addTask(Runnable runnable) {
+	// taskQueueRunner.add(runnable);
+	// }
 
-	public void setTaskQueueRunner(TaskQueueRunner taskQueueRunner) {
-		this.taskQueueRunner = taskQueueRunner;
-	}
-
-	public void addTask(Runnable runnable) {
-		taskQueueRunner.add(runnable);
+	public int getCurrentPlayerIndex() {
+		return turnCount.get() % 4;
 	}
 
 	@Override
 	public String toString() {
-		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", continued=" + continued + ", readyCount=" + readyCount + ", joinCount=" + joinCount + ", turnCount=" + turnCount + ", aeroplanes=" + Arrays.toString(aeroplanes) + ", taskQueueRunner=" + taskQueueRunner + "]";
-	}
-
-	public int getCurrentPlayerIndex() {
-		return turnCount.get() % 4;
+		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", continued=" + continued + ", readyCount=" + readyCount + ", joinCount=" + joinCount + ", turnCount=" + turnCount + ", aeroplanes=" + Arrays.toString(aeroplanes) + "]";
 	}
 
 }
