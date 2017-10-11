@@ -12,7 +12,7 @@
 	<div id="game-id"></div>
 	<div id="board-mask">
 		<form id="board-main" action="javascript:start()">
-			<input id="name" type="text" placeholder="N A M E" required maxlength="6" />
+			<input id="name" type="text" placeholder="N A M E" maxlength="6" />
 			<input type="submit" value="START" />
 		</form>
 	</div>

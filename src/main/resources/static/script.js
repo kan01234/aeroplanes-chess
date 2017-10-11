@@ -116,7 +116,7 @@ window.addEventListener('load', () => {
 		for (j = 1; j <= number_of_chess; j++)
 			this[`p${i}`].addChess(new Chess(`Chess ${j}`, this[`container_chess_c${j}_x`], this[`container_chess_c${j}_y`]))
 	}
-	
+
 	drawCanvas(board, boardChess);
 })
 
@@ -160,7 +160,7 @@ var join = (name) => {
 }
 
 var start = () => {
-	var name = document.getElementById('name').value
+	var name = document.getElementById('name').value || 'Anonymous';
 	join(name);
 	document.getElementById('board-mask').style.display = 'none';
 	appendSystemMessage(`Welcome ${name}!`);
@@ -186,7 +186,7 @@ var drawCanvas = (canvas, canvas_top) => {
 	for (i = 1; i <= number_of_player; i++)	{
 		player = this[`p${i}`];
 		nc = 0;
-	
+
 		color = player.color;
 		ctx.strokeStyle = color;
 		ctx.lineWidth = 2;
@@ -232,7 +232,7 @@ var drawCanvas = (canvas, canvas_top) => {
 		ctx.fill();
 		ctx.stroke();
 		player.addFlow(`${container_start_prefix}${i - 1}`, x, y);
-	
+
 		// chess point
 		if (i < 5) {
 			p = player.container_start.p;
@@ -305,7 +305,7 @@ var joined = () => {
 		clearInterval(diceInterval);
 		dice.innerHTML = dices[Number(body.roll) - 1];
 	});
-	
+
 	stompClient.subscribe(`/game/${gameId}/move-${sessionId}`, function(res) {
 		appendSystemMessage('Choose a chess to move!', system_alert_color);
 		countDown(() => {
