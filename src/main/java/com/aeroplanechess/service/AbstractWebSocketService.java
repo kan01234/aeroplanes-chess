@@ -10,9 +10,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MessagingService {
+public class AbstractWebSocketService {
 
-	Logger logger = LoggerFactory.getLogger(MessagingService.class);
+	Logger logger = LoggerFactory.getLogger(AbstractWebSocketService.class);
 
 	@Autowired
 	SimpMessagingTemplate simpMessagingTemplate;

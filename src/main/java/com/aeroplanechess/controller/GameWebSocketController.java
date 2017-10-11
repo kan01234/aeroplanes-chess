@@ -9,6 +9,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
 import com.aeroplanechess.service.GameService;
+import com.aeroplanechess.service.PlayerService;
 
 @Controller
 public class GameWebSocketController {
@@ -16,20 +17,23 @@ public class GameWebSocketController {
 	@Autowired
 	GameService gameService;
 
+	@Autowired
+	PlayerService playerService;
+
 	Logger logger = LoggerFactory.getLogger(GameWebSocketController.class);
 
 	@MessageMapping("/join/{gameId}/{name}")
 	public void join(@Header("simpSessionId") String sessionId, @DestinationVariable(value = "gameId") String gameId, @DestinationVariable(value = "name") String name) {
 		if (gameId.equals("null")) {
-			gameService.addPlayer(sessionId, name);
+			playerService.addPlayer(sessionId, name);
 		} else {
-			gameService.addPlayer(sessionId, gameId, name);
+			playerService.addPlayer(sessionId, gameId, name);
 		}
 	}
 
 	@MessageMapping("/ready/{gameId}")
 	public void ready(@Header("simpSessionId") String sessionId, @DestinationVariable("gameId") String gameId) {
-		gameService.ready(sessionId, gameId);
+		playerService.ready(sessionId, gameId);
 	}
 
 	@MessageMapping("/roll/{gameId}")

@@ -1,6 +1,8 @@
 package com.aeroplanechess.repository;
 
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -18,9 +20,8 @@ public class GameRepository {
 	@Autowired
 	Map<String, Game> playingGameMap;
 
-	// TODO move to redis ?
 	@Autowired
-	Map<String, String> playerGameMap;
+	PlayerRepository playerRepository;
 
 	public Game getPlayingGame(String gameId) {
 		return playingGameMap.containsKey(gameId) ? playingGameMap.get(gameId) : null;
@@ -38,12 +39,11 @@ public class GameRepository {
 		return playingGameMap;
 	}
 
-	public Map<String, String> getPlayerGameMap() {
-		return playerGameMap;
-	}
-
 	public Game removePlayingGame(String gameId) {
-		return playingGameMap.remove(gameId);
+		Game game = playingGameMap.remove(gameId);
+		if (game != null)
+			playerRepository.removePlayer(Stream.of(game.getPlayers()).map(p -> p.getSessionId()).collect(Collectors.toList()));
+		return game;
 	}
 
 	public Game removeWaitingGame(String gameId) {
@@ -56,10 +56,6 @@ public class GameRepository {
 
 	public Game addWaitingGame(String gameId, Game game) {
 		return waitingGameMap.put(gameId, game);
-	}
-
-	public String removePlayer(String sessionId) {
-		return playerGameMap.remove(sessionId);
 	}
 
 }

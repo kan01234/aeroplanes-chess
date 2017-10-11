@@ -7,18 +7,18 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-import com.aeroplanechess.service.GameService;
+import com.aeroplanechess.service.PlayerService;
 
 @Component
 public class StompDisconnectedEventListener implements ApplicationListener<SessionDisconnectEvent> {
 
 	@Autowired
 	@Lazy
-	GameService gameService;
+	PlayerService playerService;
 
 	@Override
 	public void onApplicationEvent(SessionDisconnectEvent sessionDisconnectEvent) {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(sessionDisconnectEvent.getMessage());
-		gameService.removePlayer(headerAccessor.getSessionId());
+		playerService.removePlayer(headerAccessor.getSessionId());
 	}
 }
