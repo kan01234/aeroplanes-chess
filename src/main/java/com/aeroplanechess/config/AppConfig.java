@@ -12,6 +12,7 @@ import com.aeroplanechess.model.Game;
 import com.aeroplanechess.utils.DiceUtils;
 import com.aeroplanechess.utils.GameUtils;
 import com.aeroplanechess.utils.MoveUtils;
+import com.aeroplanechess.utils.PlayerUtils;
 import com.aeroplanechess.utils.WinUtils;
 
 @Configuration
@@ -56,6 +57,11 @@ public class AppConfig {
 	@Bean
 	public GameUtils getGameUtils() {
 		return new GameUtils();
+	}
+
+	@Bean
+	public PlayerUtils getPlayerUtils() {
+		return new PlayerUtils();
 	}
 
 	@Bean

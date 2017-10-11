@@ -57,12 +57,10 @@ public class GameService extends AbstractWebSocketService {
 		aeroplanes = gameUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
 		send("move-result", gameId, "aeroplanes", aeroplanes);
 		// check win
-		if (gameUtils.isWin(aeroplanes, currentPlayer)) {
-			gameRepository.removePlayingGame(gameId);
-			send("won", gameId, "player-won", currentPlayer);
-		} else {
+		if (gameUtils.isWin(aeroplanes, currentPlayer))
+			playerWin(gameId, currentPlayer);
+		else
 			nextTurn(game, rollResult == 6);
-		}
 	}
 
 	void thridSix(Game game) {
@@ -84,6 +82,20 @@ public class GameService extends AbstractWebSocketService {
 			game.setContinued(0);
 		}
 		sendTo("your-turn", game.getPlayers()[game.getCurrentPlayerIndex()].getSessionId(), game.getId(), "your-turn", true);
+	}
+
+	public void playerWin(String gameId, int playerIndex) {
+		logger.info("playerWin, gameId: " + gameId + ", playerIndex: " + playerIndex);
+		gameRepository.removePlayingGame(gameId);
+		send("won", gameId, "player-won", playerIndex);
+	}
+
+	public void playerLeaved(Game game, int playerIndex) {
+		logger.info("playerLeaved, game: " + game + ", playerIndex: " + playerIndex);
+		gameUtils.allBackToBase(game.getAeroplanes(), playerIndex);
+		send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), playerIndex });
+		if (playerIndex == game.getCurrentPlayerIndex())
+			nextTurn(game, false);
 	}
 
 }

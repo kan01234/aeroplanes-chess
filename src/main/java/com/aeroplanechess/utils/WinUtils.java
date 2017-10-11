@@ -2,7 +2,6 @@ package com.aeroplanechess.utils;
 
 import com.aeroplanechess.enums.CellPrefix;
 import com.aeroplanechess.model.Aeroplane;
-import com.aeroplanechess.model.Player;
 
 public class WinUtils {
 
@@ -15,14 +14,6 @@ public class WinUtils {
 				break;
 		}
 		return count == 4;
-	}
-
-	public int lastPlayerIndex(Player[] players) {
-		int j = 0;
-		for (; j < players.length; j++)
-			if (players[j] != null)
-				break;
-		return j >= players.length ? -1 : j;
 	}
 
 }

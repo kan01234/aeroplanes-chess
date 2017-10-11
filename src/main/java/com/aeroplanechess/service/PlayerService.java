@@ -12,7 +12,7 @@ import com.aeroplanechess.model.Game;
 import com.aeroplanechess.model.Player;
 import com.aeroplanechess.repository.GameRepository;
 import com.aeroplanechess.repository.PlayerRepository;
-import com.aeroplanechess.utils.GameUtils;
+import com.aeroplanechess.utils.PlayerUtils;
 
 @Service
 public class PlayerService extends AbstractWebSocketService {
@@ -32,7 +32,7 @@ public class PlayerService extends AbstractWebSocketService {
 	GameBuilder gameBuilder;
 
 	@Autowired
-	GameUtils gameUtils;
+	PlayerUtils playerUtils;
 
 	public String addPlayer(String sessionId, String name) {
 		logger.info("addPlayer, sessionId: " + sessionId);
@@ -101,14 +101,10 @@ public class PlayerService extends AbstractWebSocketService {
 				game.getReadyCount().decrementAndGet();
 		} else {
 			if (game.getReadyCount().decrementAndGet() == 1) {
-				gameRepository.removePlayingGame(gameId);
-				send("won", gameId, "player-won", gameUtils.lastPlayerIndex(players));
+				gameService.playerWin(gameId, playerUtils.getLastPlayerIndex(players));
 				return;
 			}
-			gameUtils.allBackToBase(game.getAeroplanes(), i);
-			send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), i, i });
-			if (i == game.getCurrentPlayerIndex())
-				gameService.nextTurn(game, false);
+			gameService.playerLeaved(game, i);
 		}
 		send("player-list", game.getId(), "players", players);
 	}
