@@ -3,6 +3,7 @@ package com.aeroplanechess.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.aeroplanechess.model.Aeroplane;
 import com.aeroplanechess.model.Game;
@@ -10,6 +11,7 @@ import com.aeroplanechess.model.Player;
 import com.aeroplanechess.repository.GameRepository;
 import com.aeroplanechess.utils.GameUtils;
 
+@Service
 public class GameService extends AbstractWebSocketService {
 
 	Logger logger = LoggerFactory.getLogger(GameService.class);
