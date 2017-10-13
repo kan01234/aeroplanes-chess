@@ -1,5 +1,7 @@
 package com.aeroplanechess.utils;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.aeroplanechess.model.Aeroplane;
@@ -19,11 +21,11 @@ public class GameUtils {
 		return diceUtils.roll();
 	}
 
-	public Aeroplane[] allBackToBase(Aeroplane[] aeroplanes, int playerIndex) {
-		return moveUtils.allBackToBase(aeroplanes, playerIndex);
+	public void allBackToBase(Aeroplane[] aeroplanes, int playerIndex) {
+		moveUtils.allBackToBase(aeroplanes, playerIndex);
 	}
 
-	public Aeroplane[] move(Aeroplane[] aeroplanes, int aeroplaneIndex, int rollResult) {
+	public List<Integer> move(Aeroplane[] aeroplanes, int aeroplaneIndex, int rollResult) {
 		return moveUtils.move(aeroplanes, aeroplaneIndex, rollResult);
 	}
 

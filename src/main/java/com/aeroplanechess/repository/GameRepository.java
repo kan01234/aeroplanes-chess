@@ -51,7 +51,8 @@ public class GameRepository {
 	}
 
 	public Game addPlayingGame(String gameId, Game game) {
-		return playingGameMap.put(gameId, game);
+		playingGameMap.put(gameId, game);
+		return game;
 	}
 
 	public Game addWaitingGame(String gameId, Game game) {

@@ -40,8 +40,10 @@ public class PlayerService extends AbstractWebSocketService {
 		Game game = null;
 		game = waitingGameMap.values().stream().filter(g -> g.getJoinCount().getAndIncrement() <= 4).findAny().orElse(null);
 		// create new game, if no available waiting game exists
-		if (game == null)
-			game = new Game();
+		if (game == null) {
+			game = gameBuilder.build();
+			waitingGameMap.put(game.getId(), game);
+		}
 		return addPlayer(sessionId, name, game);
 	}
 

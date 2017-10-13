@@ -1,5 +1,7 @@
 package com.aeroplanechess.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,8 +56,8 @@ public class GameService extends AbstractWebSocketService {
 		int currentPlayer = game.getCurrentPlayerIndex();
 		Aeroplane[] aeroplanes = game.getAeroplanes();
 		// move
-		aeroplanes = gameUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
-		send("move-result", gameId, "aeroplanes", aeroplanes);
+		List<Integer> encountered = gameUtils.move(aeroplanes, currentPlayer * 4 + aeroplaneIndex, rollResult);
+		send("move-result", gameId, new String[] { "aeroplanes", "encountered" }, new Object[] { aeroplanes, encountered });
 		// check win
 		if (gameUtils.isWin(aeroplanes, currentPlayer))
 			playerWin(gameId, currentPlayer);
