@@ -125,10 +125,4 @@ public class PlayerService extends AbstractWebSocketService {
 			gameService.start(gameId);
 	}
 
-	Game newGame() {
-		Game game = gameBuilder.build();
-		gameRepository.getWaitingGameMap().put(game.getId(), game);
-		return game;
-	}
-
 }
