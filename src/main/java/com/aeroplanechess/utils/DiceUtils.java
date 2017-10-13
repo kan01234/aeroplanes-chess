@@ -7,6 +7,9 @@ public class DiceUtils {
 	Random random;
 	int min, max;
 
+	public DiceUtils() {
+	}
+
 	public DiceUtils(int min, int max) {
 		this.min = min;
 		this.max = max;
