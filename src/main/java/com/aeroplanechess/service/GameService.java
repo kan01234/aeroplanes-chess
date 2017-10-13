@@ -79,6 +79,7 @@ public class GameService extends AbstractWebSocketService {
 		nextTurn(game, false);
 	}
 
+	// TODO review herer, continued not thread safe
 	void nextTurn(Game game, boolean isContinue) {
 		logger.info("nextTurn, game:" + game + ", isContinue: " + isContinue);
 		if (isContinue)

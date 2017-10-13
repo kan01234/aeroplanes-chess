@@ -1,5 +1,6 @@
 package com.aeroplanechess.model;
 
+// TODO maybe add continued field in this model?
 public class Player {
 
 	String name;
