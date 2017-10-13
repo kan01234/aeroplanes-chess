@@ -5,6 +5,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.aeroplanechess.builder.GameBuilder;
@@ -34,7 +35,7 @@ public class PlayerService extends AbstractWebSocketService {
 	@Autowired
 	PlayerUtils playerUtils;
 
-	@Autowired
+	@Value(value = "${game.config.numof.player}")
 	int numOfPlayer;
 
 	public String addPlayer(String sessionId, String name) {
