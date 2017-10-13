@@ -32,15 +32,11 @@ public class GameBuilder {
 
 	private void initAeroPlane() {
 		Aeroplane[] aeroplanes = new Aeroplane[numOfPlayer * numOfAeroplane];
-		Aeroplane aeroplane;
 		int indexCount = -1;
 		for (int i = 0; i < aeroplanes.length; i++) {
 			if (i % numOfPlayer == 0)
 				indexCount++;
-			aeroplane = new Aeroplane();
-			aeroplane.setColor(indexCount);
-			aeroplane.setInCellId("ba" + indexCount);
-			aeroplanes[i] = aeroplane;
+			aeroplanes[i] = new Aeroplane(indexCount, "ba" + indexCount);
 		}
 
 		game.setAeroplanes(aeroplanes);

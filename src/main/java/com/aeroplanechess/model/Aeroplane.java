@@ -5,6 +5,12 @@ public class Aeroplane {
 	int color;
 	String inCellId;
 
+	public Aeroplane(int color, String inCellId) {
+		super();
+		this.color = color;
+		this.inCellId = inCellId;
+	}
+
 	public int getColor() {
 		return color;
 	}
