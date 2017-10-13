@@ -38,7 +38,7 @@ public class PlayerService extends AbstractWebSocketService {
 		logger.info("addPlayer, sessionId: " + sessionId);
 		Map<String, Game> waitingGameMap = gameRepository.getWaitingGameMap();
 		Game game = null;
-		game = waitingGameMap.values().stream().filter(g -> g.getJoinCount().getAndIncrement() <= 4).findAny().orElse(null);
+		game = waitingGameMap.values().stream().filter(g -> g.getJoinCount().getAndIncrement() <= 4).findFirst().orElse(null);
 		// create new game, if no available waiting game exists
 		if (game == null) {
 			game = gameBuilder.build();
