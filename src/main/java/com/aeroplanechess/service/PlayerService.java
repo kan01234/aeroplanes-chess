@@ -71,7 +71,7 @@ public class PlayerService extends AbstractWebSocketService {
 
 		for (; i < players.length; i++) {
 			if (players[i] == null) {
-				players[i] = new Player(name, i, sessionId);
+				players[i] = new Player(name, sessionId);
 				break;
 			}
 		}
