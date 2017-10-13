@@ -5,6 +5,9 @@ public class Aeroplane {
 	int color;
 	String inCellId;
 
+	public Aeroplane() {
+	}
+
 	public Aeroplane(int color, String inCellId) {
 		super();
 		this.color = color;
