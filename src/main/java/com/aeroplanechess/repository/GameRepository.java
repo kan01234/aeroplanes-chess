@@ -56,7 +56,8 @@ public class GameRepository {
 	}
 
 	public Game addWaitingGame(String gameId, Game game) {
-		return waitingGameMap.put(gameId, game);
+		waitingGameMap.put(gameId, game);
+		return game;
 	}
 
 }
