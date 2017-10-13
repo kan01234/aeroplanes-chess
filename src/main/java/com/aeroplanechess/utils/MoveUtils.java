@@ -3,12 +3,20 @@ package com.aeroplanechess.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import com.aeroplanechess.enums.CellPrefix;
 import com.aeroplanechess.model.Aeroplane;
 
 public class MoveUtils {
 
 	final int MAX_NUM_OF_CIRCLE = 52;
+
+	@Value(value = "${game.config.numof.aeroplane}")
+	int numOfAeroplane;
+
+	@Value(value = "${game.config.numof.player}")
+	int numOfPlayer;
 
 	public List<Integer> move(Aeroplane[] aeroplanes, int aeroplaneIndex, int rollResult) {
 		Aeroplane aeroplane = aeroplanes[aeroplaneIndex];
@@ -44,24 +52,24 @@ public class MoveUtils {
 		}
 
 		// shortcut > jump
-		if (destPrefix.equals(CellPrefix.Sky.getPrefix()) && destNum % 4 == color) {
+		if (destPrefix.equals(CellPrefix.Sky.getPrefix()) && destNum % numOfPlayer == color) {
 			int shortcutFrom = getShortcutFrom(destNum, color);
 			if (shortcutFrom == destNum) {
 				destNum += 12;
 				destNum %= MAX_NUM_OF_CIRCLE;
 			} else if (!isTurn(destNum, color)) {
-				destNum += 4;
+				destNum += numOfPlayer;
 				destNum %= MAX_NUM_OF_CIRCLE;
 			}
 		}
 
-		for (int i = 0; i < color * 4; i++) {
+		for (int i = 0; i < color * numOfAeroplane; i++) {
 			if (aeroplanes[i].getInCellId().equals(destPrefix + destNum)) {
 				encountered.add(i);
 			}
 		}
 
-		for (int i = color * 4 + 4; i < aeroplanes.length; i++) {
+		for (int i = (color + 1) * numOfAeroplane; i < aeroplanes.length; i++) {
 			if (aeroplanes[i].getInCellId().equals(destPrefix + destNum)) {
 				encountered.add(i);
 			}
@@ -103,8 +111,8 @@ public class MoveUtils {
 	}
 
 	public void allBackToBase(Aeroplane[] aeroplanes, int playerIndex) {
-		int start = playerIndex * 4;
-		for (int i = start; i < start + 4; i++)
+		int start = playerIndex * numOfAeroplane;
+		for (int i = start; i < start + numOfAeroplane; i++)
 			aeroplanes[i].setInCellId(CellPrefix.Base.getPrefix() + playerIndex);
 	}
 

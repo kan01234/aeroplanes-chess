@@ -12,3 +12,6 @@ game:
     dice:
       min: 1
       max: 6
+    numof:
+      player: 4
+      aeroplane: 4

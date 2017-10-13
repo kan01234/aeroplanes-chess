@@ -92,7 +92,7 @@ public class Game {
 	// }
 
 	public int getCurrentPlayerIndex() {
-		return turnCount.get() % 4;
+		return turnCount.get() % players.length;
 	}
 
 	@Override

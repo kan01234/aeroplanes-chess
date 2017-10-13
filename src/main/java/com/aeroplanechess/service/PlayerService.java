@@ -34,11 +34,14 @@ public class PlayerService extends AbstractWebSocketService {
 	@Autowired
 	PlayerUtils playerUtils;
 
+	@Autowired
+	int numOfPlayer;
+
 	public String addPlayer(String sessionId, String name) {
 		logger.info("addPlayer, sessionId: " + sessionId);
 		Map<String, Game> waitingGameMap = gameRepository.getWaitingGameMap();
 		Game game = null;
-		game = waitingGameMap.values().stream().filter(g -> g.getJoinCount().getAndIncrement() <= 4).findFirst().orElse(null);
+		game = waitingGameMap.values().stream().filter(g -> g.getJoinCount().getAndIncrement() <= numOfPlayer).findFirst().orElse(null);
 		// create new game, if no available waiting game exists
 		if (game == null) {
 			game = gameBuilder.build();
@@ -50,7 +53,7 @@ public class PlayerService extends AbstractWebSocketService {
 	public String addPlayer(String sessionId, String gameId, String name) {
 		logger.info("addPlayer, sessionId: " + sessionId + ", gameId: " + gameId + ", name: " + name);
 		Game game = gameRepository.getWaitingGame(gameId);
-		if (game != null && game.getJoinCount().incrementAndGet() <= 4)
+		if (game != null && game.getJoinCount().incrementAndGet() <= numOfPlayer)
 			return addPlayer(sessionId, name, game);
 		else
 			sendTo("joined", sessionId, "error", true);
@@ -117,7 +120,7 @@ public class PlayerService extends AbstractWebSocketService {
 		if (game == null)
 			return;
 		send("player-list", gameId, "players", game.getPlayers());
-		if (game.getReadyCount().incrementAndGet() == 4)
+		if (game.getReadyCount().incrementAndGet() == numOfPlayer)
 			gameService.start(gameId);
 	}
 
