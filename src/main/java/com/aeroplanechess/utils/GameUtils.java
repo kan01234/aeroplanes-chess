@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.aeroplanechess.enums.CellPrefix;
 import com.aeroplanechess.model.Aeroplane;
 
 public class GameUtils {
@@ -13,9 +14,6 @@ public class GameUtils {
 
 	@Autowired
 	MoveUtils moveUtils;
-
-	@Autowired
-	WinUtils winUtils;
 
 	public int roll() {
 		return diceUtils.roll();
@@ -30,7 +28,14 @@ public class GameUtils {
 	}
 
 	public boolean isWin(Aeroplane[] aeroplanes, int currentPlayer) {
-		return winUtils.isWin(aeroplanes, currentPlayer);
+		int count = 0;
+		for (int i = currentPlayer * 4; i < i + 4; i++) {
+			if (aeroplanes[i].getInCellId().substring(0, 2).equals(CellPrefix.Goal.getPrefix()))
+				count++;
+			else
+				break;
+		}
+		return count == 4;
 	}
 
 }

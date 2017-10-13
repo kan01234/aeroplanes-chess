@@ -13,7 +13,6 @@ import com.aeroplanechess.utils.DiceUtils;
 import com.aeroplanechess.utils.GameUtils;
 import com.aeroplanechess.utils.MoveUtils;
 import com.aeroplanechess.utils.PlayerUtils;
-import com.aeroplanechess.utils.WinUtils;
 
 @Configuration
 public class AppConfig {
@@ -47,11 +46,6 @@ public class AppConfig {
 	@Bean
 	public MoveUtils getMoveUtils() {
 		return new MoveUtils();
-	}
-
-	@Bean
-	public WinUtils getWinUtils() {
-		return new WinUtils();
 	}
 
 	@Bean
