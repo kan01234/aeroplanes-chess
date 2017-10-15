@@ -2,14 +2,20 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title></title>
+<title>Aeroplanes Chess</title>
 <link href="/css/style.css" rel="stylesheet"></link>
+<link rel="icon" href="favicon.png"/>
 </head>
 <body>
 	<div class="wrapper-header">
 		<h1 id="title">Aeroplane Chess</h1>
 	</div>
 	<div id="game-id"></div>
+	<input id="game-id-hidden">
+	<img id="game-chess-hidden-1" src="image/aeroplanes1.png">
+	<img id="game-chess-hidden-2" src="image/aeroplanes2.png">
+	<img id="game-chess-hidden-3" src="image/aeroplanes3.png">
+	<img id="game-chess-hidden-4" src="image/aeroplanes4.png">
 	<div id="board-mask">
 		<form id="board-main" action="javascript:start()">
 			<input id="name" type="text" placeholder="N A M E" maxlength="6" />
@@ -99,5 +105,5 @@
 </script>
 <script src="/webjars/stomp-websocket/stomp.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="/script.js"></script>
+<script src="script/script.js"></script>
 </html>

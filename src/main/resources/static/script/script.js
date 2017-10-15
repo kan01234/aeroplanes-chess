@@ -140,10 +140,18 @@ var join = (name) => {
 		stompClient.subscribe(`/game/joined-${sessionId}`, function(res) {
 			res = JSON.parse(res.body);
 			gameId = res["game-id"];
-			document.getElementById('game-id').innerHTML = `#${gameId} <- Click to Copy!`;
+			document.getElementById('game-id').innerHTML = `#${gameId}`;
+			document.getElementById('game-id-hidden').value = `${location.origin}#${gameId}`;
 			document.getElementById('game-id').addEventListener('click', () => {
 				console.log(gameId);
-				//TODO: copy function
+				document.getElementById('game-id-hidden').select();
+				try {
+					var successful = document.execCommand('copy');
+					var msg = successful ? 'successful' : 'unsuccessful';
+					console.log('Copying text command was ' + msg);
+				} catch (err) {
+					console.log('Oops, unable to copy');
+				}
 			})
 			if(res.error) {
 				appendSystemMessage('Error, the game is full or not existing in waiting game list.', system_alert_color);
@@ -160,7 +168,7 @@ var join = (name) => {
 }
 
 var start = () => {
-	var name = document.getElementById('name').value || 'Anonymous';
+	var name = document.getElementById('name').value || 'NONAME';
 	join(name);
 	document.getElementById('board-mask').style.display = 'none';
 	appendSystemMessage(`Welcome ${name}!`);
@@ -182,10 +190,11 @@ var resizeCanvas = (canvas) => {
 }
 
 var drawCanvas = (canvas, canvas_top) => {
-	var ctx = canvas.getContext('2d'), ctx_top = canvas_top.getContext('2d'), player, chess, i, j, k, x, y, p, t, n, nc, sc, color, c, s;
+	var ctx = canvas.getContext('2d'), ctx_top = canvas_top.getContext('2d'), player, chess, i, j, k, x, y, p, t, tp, n, nc, sc, color, c, s, shortCut;
 	for (i = 1; i <= number_of_player; i++)	{
 		player = this[`p${i}`];
 		nc = 0;
+		shortCut = 0;
 
 		color = player.color;
 		ctx.strokeStyle = color;
@@ -210,12 +219,14 @@ var drawCanvas = (canvas, canvas_top) => {
 		// chess home point
 		for (j = 0; j < player.chess.length; j++)	{
 			ctx.beginPath();
+			ctx.globalAlpha = 0.4;
 			ctx.arc(player.container_home.x + player.chess[j].x, player.container_home.y + player.chess[j].y, container_chess_common_radius, container_chess_common_startAngle, container_chess_common_endAngle);
 			ctx.stroke();
 			ctx.fill();
 			ctx_top.beginPath();
-			ctx_top.fillText(j + 1, player.container_home.x + player.chess[j].x - common_distance, player.container_home.y + player.chess[j].y + common_distance);
-			ctx_top.strokeText(j + 1, player.container_home.x + player.chess[j].x - common_distance, player.container_home.y + player.chess[j].y + common_distance);
+			ctx_top.drawImage(document.getElementById(`game-chess-hidden-${i}`), player.container_home.x + player.chess[j].x - common_distance, player.container_home.y + player.chess[j].y - common_distance, container_chess_common_radius, container_chess_common_radius);
+			//ctx_top.fillText(j + 1, player.container_home.x + player.chess[j].x - common_distance, player.container_home.y + player.chess[j].y + common_distance);
+			//ctx_top.strokeText(j + 1, player.container_home.x + player.chess[j].x - common_distance, player.container_home.y + player.chess[j].y + common_distance);
 			player.addFlow(`${container_home_prefix}${j}`, player.container_home.x + player.chess[j].x, player.container_home.y + player.chess[j].y);
 		}
 		// chess start point
@@ -233,44 +244,54 @@ var drawCanvas = (canvas, canvas_top) => {
 		ctx.stroke();
 		player.addFlow(`${container_start_prefix}${i - 1}`, x, y);
 
-		// chess point
-		if (i < 5) {
-			p = player.container_start.p;
-			s = player.number_of_steps;
-			c = player.color_of_steps;
-			sc = (i - 1)* 5;
-			for (j = 0; j < this[`number_of_steps_${s}`].length; j++) {
-				t = j === 0? player.turn_of_steps : turn_of_steps[p];
-				for (k = 0; k < this[`number_of_steps_${s}`][j]; k++) {
-					color = (j + 1) >= this[`number_of_steps_${s}`].length - 1? player.color : color_of_steps[c];
-					n = turn[t](x, y, container_chess_common_distance);
-					x = n.x;
-					y = n.y;
+		p = player.container_start.p;
+		s = player.number_of_steps;
+		c = player.color_of_steps;
+		sc = (i - 1) * 5;
+		for (j = 0; j < this[`number_of_steps_${s}`].length; j++) {
+			tp = t;
+			t = j === 0? player.turn_of_steps : turn_of_steps[p];
+			for (k = 0; k < this[`number_of_steps_${s}`][j]; k++) {
+				shortCut++;
+				if (shortCut === 19) {
 					ctx.beginPath();
-					ctx.arc(x, y, container_chess_common_radius, container_chess_common_startAngle, container_chess_common_endAngle);
 					ctx.strokeStyle = color;
-					ctx.globalAlpha = (j + 1) >= this[`number_of_steps_${s}`].length - 1? 0.4 : 0.2;
-					ctx.fillStyle = color;
-					ctx.fill();
+					ctx.setLineDash([5, 3]);
+					ctx.beginPath();
+					ctx.moveTo(x, y);
+					n = turn[tp](x, y, container_chess_common_distance * 6);
+					ctx.lineTo(n.x, n.y);
 					ctx.stroke();
-					if (j === this[`number_of_steps_${s}`].length - 1) {
-						player.addFlow(`${container_chess_goal_prefix}`, x, y);
-					} else if (j === this[`number_of_steps_${s}`].length - 2) {
-						player.addFlow(`${container_chess_land_prefix}${sc + k}`, x, y);
-					} else {
-						var calc = container_chess_sky_points[i - 1] + nc >= 52? (container_chess_sky_points[i - 1] + nc) % 52 : container_chess_sky_points[i - 1] + nc;
-						player.addFlow(`${container_chess_sky_prefix}${calc}`, x, y);
-					}
-					c++;
-					if (c === number_of_player)
-						c = 0;
-					nc++;
 				}
-				if (j != 0) {
-					p++;
-					if (p === turn_of_steps.length)
-					p = 0;
+				color = (j + 1) >= this[`number_of_steps_${s}`].length - 1? player.color : color_of_steps[c];
+				n = turn[t](x, y, container_chess_common_distance);
+				x = n.x;
+				y = n.y;
+				ctx.beginPath();
+				ctx.setLineDash([1, 0]);
+				ctx.arc(x, y, container_chess_common_radius, container_chess_common_startAngle, container_chess_common_endAngle);
+				ctx.strokeStyle = color;
+				ctx.globalAlpha = (j + 1) >= this[`number_of_steps_${s}`].length - 1? 0.4 : 0.2;
+				ctx.fillStyle = color;
+				ctx.fill();
+				ctx.stroke();
+				if (j === this[`number_of_steps_${s}`].length - 1) {
+					player.addFlow(`${container_chess_goal_prefix}`, x, y);
+				} else if (j === this[`number_of_steps_${s}`].length - 2) {
+					player.addFlow(`${container_chess_land_prefix}${sc + k}`, x, y);
+				} else {
+					var calc = container_chess_sky_points[i - 1] + nc >= 52? (container_chess_sky_points[i - 1] + nc) % 52 : container_chess_sky_points[i - 1] + nc;
+					player.addFlow(`${container_chess_sky_prefix}${calc}`, x, y);
 				}
+				c++;
+				if (c === number_of_player)
+					c = 0;
+				nc++;
+			}
+			if (j != 0) {
+				p++;
+				if (p === turn_of_steps.length)
+				p = 0;
 			}
 		}
 	}
@@ -338,8 +359,8 @@ var joined = () => {
 		for(var i = 0 in aeroplanes) {
 			player = this[`p${aeroplanes[i].color + 1}`];
 			ctx_top.beginPath();
-			ctx_top.strokeStyle = player.color || 'white';
-			ctx_top.fillStyle = player.color;
+			//ctx_top.strokeStyle = player.color || 'white';
+			//ctx_top.fillStyle = player.color;
 			player_chess = document.getElementById(`p${aeroplanes[i].color + 1}-c${i - (aeroplanes[i].color * 4)}`);
 			if (aeroplanes[i].inCellId.indexOf(container_chess_goal_prefix) === 0) {
 				player_pos = container_chess_goal_prefix;
@@ -351,8 +372,9 @@ var joined = () => {
 			}
 			player_flow = player.flow[player_pos];
 			player_chess.dataset.pos = player_pos;
-			ctx_top.fillText(i - (aeroplanes[i].color * 4) + 1, player_flow.x - common_distance, player_flow.y + common_distance);
-			ctx_top.strokeText(i - (aeroplanes[i].color * 4) + 1, player_flow.x - common_distance, player_flow.y + common_distance);
+			ctx_top.drawImage(document.getElementById(`game-chess-hidden-${aeroplanes[i].color + 1}`), player_flow.x - common_distance, player_flow.y - common_distance, container_chess_common_radius, container_chess_common_radius);
+			//ctx_top.fillText(i - (aeroplanes[i].color * 4) + 1, player_flow.x - common_distance, player_flow.y + common_distance);
+			//ctx_top.strokeText(i - (aeroplanes[i].color * 4) + 1, player_flow.x - common_distance, player_flow.y + common_distance);
 		}
 		rollDice();
 	});

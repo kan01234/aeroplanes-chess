@@ -10,10 +10,12 @@ html {
 }
 
 body {
+	height: 100%;
 	min-height: inherit;
 	min-width: inherit;
 	margin: 0;
 	padding: 0;
+	position: relative;
 	width: inherit;
 }
 
@@ -63,6 +65,14 @@ body {
 }
 #game-id:active {
 	opacity: 1;
+}
+#game-id-hidden,
+#game-chess-hidden-1,
+#game-chess-hidden-2,
+#game-chess-hidden-3,
+#game-chess-hidden-4 {
+	left: -999px;
+	position: absolute;
 }
 
 #background, #background-mask {
