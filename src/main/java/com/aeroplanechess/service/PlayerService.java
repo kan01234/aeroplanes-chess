@@ -17,16 +17,16 @@ import com.aeroplanechess.utils.PlayerUtils;
 @Service
 public class PlayerService extends AbstractWebSocketService {
 
-	Logger logger = LoggerFactory.getLogger(GameService.class);
+	Logger logger = LoggerFactory.getLogger(PlayerService.class);
 
 	@Autowired
 	PlayerRepository playerRepository;
 
 	@Autowired
-	GameRepository gameRepository;
+	GameRepository<Game> gameRepository;
 
 	@Autowired
-	GameService gameService;
+	GameService<Game> gameService;
 
 	@Autowired
 	PlayerUtils playerUtils;

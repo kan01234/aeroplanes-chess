@@ -15,7 +15,6 @@ public abstract class AbstractGameBuilder<T extends Game> {
 	public T build(T game) {
 		game.setId(UUID.randomUUID().toString());
 		game.setPlayers(new Player[numOfPlayer]);
-		// initAeroPlane();
 		return game;
 	}
 

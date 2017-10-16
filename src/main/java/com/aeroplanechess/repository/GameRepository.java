@@ -10,54 +10,54 @@ import org.springframework.stereotype.Repository;
 import com.aeroplanechess.model.Game;
 
 @Repository
-public class GameRepository {
+public class GameRepository<T extends Game> {
 
 	// TODO move to redis ?
 	@Autowired
-	Map<String, Game> waitingGameMap;
+	Map<String, T> waitingGameMap;
 
 	// TODO move to redis ?
 	@Autowired
-	Map<String, Game> playingGameMap;
+	Map<String, T> playingGameMap;
 
 	@Autowired
 	PlayerRepository playerRepository;
 
-	public Game getPlayingGame(String gameId) {
+	public T getPlayingGame(String gameId) {
 		return playingGameMap.containsKey(gameId) ? playingGameMap.get(gameId) : null;
 	}
 
-	public Game getWaitingGame(String gameId) {
+	public T getWaitingGame(String gameId) {
 		return waitingGameMap.containsKey(gameId) ? waitingGameMap.get(gameId) : null;
 	}
 
-	public Map<String, Game> getWaitingGameMap() {
+	public Map<String, T> getWaitingGameMap() {
 		return waitingGameMap;
 	}
 
-	public Map<String, Game> getPlayingGameMap() {
+	public Map<String, T> getPlayingGameMap() {
 		return playingGameMap;
 	}
 
-	public Game removePlayingGame(String gameId) {
-		Game game = playingGameMap.remove(gameId);
-		if (game != null)
-			playerRepository.removePlayer(Stream.of(game.getPlayers()).map(p -> p.getSessionId()).collect(Collectors.toList()));
-		return game;
+	public T removePlayingGame(String gameId) {
+		T t = playingGameMap.remove(gameId);
+		if (t != null)
+			playerRepository.removePlayer(Stream.of(t.getPlayers()).map(p -> p.getSessionId()).collect(Collectors.toList()));
+		return t;
 	}
 
-	public Game removeWaitingGame(String gameId) {
+	public T removeWaitingGame(String gameId) {
 		return waitingGameMap.remove(gameId);
 	}
 
-	public Game addPlayingGame(String gameId, Game game) {
-		playingGameMap.put(gameId, game);
-		return game;
+	public T addPlayingGame(String gameId, T t) {
+		playingGameMap.put(gameId, t);
+		return t;
 	}
 
-	public Game addWaitingGame(String gameId, Game game) {
-		waitingGameMap.put(gameId, game);
-		return game;
+	public T addWaitingGame(String gameId, T t) {
+		waitingGameMap.put(gameId, t);
+		return t;
 	}
 
 }

@@ -3,17 +3,17 @@ package com.aeroplanechess.builder;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.aeroplanechess.model.Aeroplane;
-import com.aeroplanechess.model.GameB;
+import com.aeroplanechess.model.AeroplaneChess;
 
-public class GameBBuilder extends AbstractGameBuilder<GameB> {
+public class AeroplaneChessBuilder extends AbstractGameBuilder<AeroplaneChess> {
 
 	@Value(value = "${game.config.numof.aeroplane}")
 	int numOfAeroplane;
 
-	public GameB build() {
-		GameB game = super.build(new GameB());
-		game.setAeroplanes(getAeroplanes());
-		return game;
+	public AeroplaneChess build() {
+		AeroplaneChess aeroplaneChess = super.build(new AeroplaneChess());
+		aeroplaneChess.setAeroplanes(getAeroplanes());
+		return aeroplaneChess;
 	}
 
 	private Aeroplane[] getAeroplanes() {

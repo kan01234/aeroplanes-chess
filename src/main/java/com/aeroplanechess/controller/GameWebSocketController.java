@@ -8,13 +8,13 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
-import com.aeroplanechess.service.GameService;
+import com.aeroplanechess.service.impl.GameServiceImpl;
 
 @Controller
 public class GameWebSocketController {
 
 	@Autowired
-	GameService gameService;
+	GameServiceImpl gameService;
 
 	Logger logger = LoggerFactory.getLogger(GameWebSocketController.class);
 

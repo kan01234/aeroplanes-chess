@@ -7,12 +7,9 @@ public class Game {
 
 	String id;
 	Player[] players;
-	int lastRoll = -1;
-	int continued = 0;
 	AtomicInteger readyCount = new AtomicInteger(0);
 	AtomicInteger joinCount = new AtomicInteger(0);
 	AtomicInteger turnCount = new AtomicInteger(-1);
-	Aeroplane[] aeroplanes;
 	// TaskQueueRunner taskQueueRunner = new TaskQueueRunner();
 
 	public String getId() {
@@ -37,30 +34,6 @@ public class Game {
 
 	public void setTurnCount(AtomicInteger turnCount) {
 		this.turnCount = turnCount;
-	}
-
-	public int getLastRoll() {
-		return lastRoll;
-	}
-
-	public void setLastRoll(int lastRoll) {
-		this.lastRoll = lastRoll;
-	}
-
-	public Aeroplane[] getAeroplanes() {
-		return aeroplanes;
-	}
-
-	public void setAeroplanes(Aeroplane[] aeroplanes) {
-		this.aeroplanes = aeroplanes;
-	}
-
-	public int getContinued() {
-		return continued;
-	}
-
-	public void setContinued(int continued) {
-		this.continued = continued;
 	}
 
 	public AtomicInteger getReadyCount() {
@@ -97,7 +70,7 @@ public class Game {
 
 	@Override
 	public String toString() {
-		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", lastRoll=" + lastRoll + ", continued=" + continued + ", readyCount=" + readyCount + ", joinCount=" + joinCount + ", turnCount=" + turnCount + ", aeroplanes=" + Arrays.toString(aeroplanes) + "]";
+		return "Game [id=" + id + ", players=" + Arrays.toString(players) + ", readyCount=" + readyCount + ", joinCount=" + joinCount + ", turnCount=" + turnCount + "]";
 	}
 
 }
