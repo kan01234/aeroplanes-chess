@@ -30,6 +30,7 @@ mvn spring boot:run
 2. You are the last player remaining in the playing game
 
 ### TODO
-- [ ] draw shortcut line on the board
-- [ ] change turn continued field to support multi-thread
+- [x] draw shortcut line on the board
+- [x] change turn continued field to support multi-thread
 - [ ] move player service and other room logic to another project
+- [ ] plan anything else
