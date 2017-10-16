@@ -17,12 +17,13 @@ mvn spring boot:run
 5. An additional shortcut when the plane land exactly on that cell, but it will not send back opposing planes on the lane
 6. have fun
 
-#### short	cut table
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
+#### shortcut table
+| Color | From | To |
+| ----- |:----:| ---:|
+| 0 | 20 | 32 |
+| 1 | 33 | 45 |
+| 2 | 46 | 6 |
+| 3 | 7 | 19 |
 
 ### How to win the game?
 1. Plane must go into the center goal with exactly roll. The first player to finish all of the plane will win the game. And the game end
