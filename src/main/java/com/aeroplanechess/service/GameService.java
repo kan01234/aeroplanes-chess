@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.aeroplanechess.builder.GameBBuilder;
 import com.aeroplanechess.model.Aeroplane;
 import com.aeroplanechess.model.Game;
 import com.aeroplanechess.model.Player;
@@ -24,6 +25,9 @@ public class GameService extends AbstractWebSocketService {
 
 	@Autowired
 	GameUtils gameUtils;
+
+	@Autowired
+	GameBBuilder gameBBuilder;
 
 	@Value(value = "${game.config.numof.aeroplane}")
 	int numOfAeroplane;
@@ -105,6 +109,10 @@ public class GameService extends AbstractWebSocketService {
 		send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), playerIndex });
 		if (playerIndex == game.getCurrentPlayerIndex())
 			nextTurn(game, false);
+	}
+
+	public Game newGame() {
+		return gameBBuilder.build();
 	}
 
 }

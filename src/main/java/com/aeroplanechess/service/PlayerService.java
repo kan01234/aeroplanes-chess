@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.aeroplanechess.builder.GameBuilder;
 import com.aeroplanechess.model.Game;
 import com.aeroplanechess.model.Player;
 import com.aeroplanechess.repository.GameRepository;
@@ -30,9 +29,6 @@ public class PlayerService extends AbstractWebSocketService {
 	GameService gameService;
 
 	@Autowired
-	GameBuilder gameBuilder;
-
-	@Autowired
 	PlayerUtils playerUtils;
 
 	@Value(value = "${game.config.numof.player}")
@@ -45,7 +41,7 @@ public class PlayerService extends AbstractWebSocketService {
 		game = waitingGameMap.values().stream().filter(g -> g.getJoinCount().getAndIncrement() <= numOfPlayer).findFirst().orElse(null);
 		// create new game, if no available waiting game exists
 		if (game == null) {
-			game = gameBuilder.build();
+			game = gameService.newGame();
 			waitingGameMap.put(game.getId(), game);
 		}
 		return addPlayer(sessionId, name, game);

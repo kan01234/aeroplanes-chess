@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.aeroplanechess.builder.GameBuilder;
+import com.aeroplanechess.builder.GameBBuilder;
 import com.aeroplanechess.model.Game;
 import com.aeroplanechess.utils.DiceUtils;
 import com.aeroplanechess.utils.GameUtils;
@@ -53,8 +53,8 @@ public class AppConfig {
 	}
 
 	@Bean
-	public GameBuilder getGameBuilder() {
-		return new GameBuilder();
+	public GameBBuilder getGameBuilder() {
+		return new GameBBuilder();
 	}
 
 }

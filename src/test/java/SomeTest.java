@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.aeroplanechess.builder.GameBuilder;
+import com.aeroplanechess.builder.AbstractGameBuilder;
 import com.aeroplanechess.config.AppConfig;
 import com.aeroplanechess.utils.GameUtils;
 
@@ -18,7 +18,7 @@ import com.aeroplanechess.utils.GameUtils;
 public class SomeTest {
 
 	@Autowired
-	GameBuilder gameBuilder;
+	AbstractGameBuilder gameBuilder;
 
 	@Autowired
 	GameUtils gameUtils;
