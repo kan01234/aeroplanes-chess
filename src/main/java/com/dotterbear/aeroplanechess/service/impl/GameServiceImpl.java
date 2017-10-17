@@ -31,10 +31,10 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 	@Autowired
 	AeroplaneChessBuilder aeroplaneChessBuilder;
 
-	@Value(value = "${game.config.numof.aeroplane}")
+	@Value(value = "${websocket.aeroplanechess.config.numof.aeroplane}")
 	int numOfAeroplane;
 
-	@Value(value = "${game.config.dice.max}")
+	@Value(value = "${websocket.aeroplanechess.config.dice.max}")
 	int diceMax;
 
 	public void start(String gameId) {

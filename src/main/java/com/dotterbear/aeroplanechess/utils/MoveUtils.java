@@ -12,10 +12,10 @@ public class MoveUtils {
 
 	final int MAX_NUM_OF_CIRCLE = 52;
 
-	@Value(value = "${game.config.numof.aeroplane}")
+	@Value(value = "${websocket.aeroplanechess.config.numof.aeroplane}")
 	int numOfAeroplane;
 
-	@Value(value = "${game.config.numof.player}")
+	@Value(value = "${websocket.gameroom.config.numof.player}")
 	int numOfPlayer;
 
 	public List<Integer> move(Aeroplane[] aeroplanes, int aeroplaneIndex, int rollResult) {

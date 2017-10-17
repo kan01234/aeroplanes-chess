@@ -35,7 +35,7 @@ public class AppConfig {
 	}
 
 	@Bean
-	public DiceUtils getDiceUtils(@Value(value = "${game.config.dice.min}") int diceMin, @Value(value = "${game.config.dice.max}") int diceMax) {
+	public DiceUtils getDiceUtils(@Value(value = "${websocket.aeroplanechess.config.dice.min}") int diceMin, @Value(value = "${websocket.aeroplanechess.config.dice.max}") int diceMax) {
 		return new DiceUtils(diceMin, diceMax);
 	}
 

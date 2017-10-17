@@ -16,7 +16,7 @@ public class GameUtils {
 	@Autowired
 	MoveUtils moveUtils;
 
-	@Value(value = "${game.config.numof.aeroplane}")
+	@Value(value = "${websocket.aeroplanechess.config.numof.aeroplane}")
 	int numOfAeroplane;
 
 	public int roll() {

@@ -7,7 +7,7 @@ import com.dotterbear.aeroplanechess.model.AeroplaneChess;
 
 public class AeroplaneChessBuilder extends AbstractGameBuilder<AeroplaneChess> {
 
-	@Value(value = "${game.config.numof.aeroplane}")
+	@Value(value = "${websocket.aeroplanechess.config.numof.aeroplane}")
 	int numOfAeroplane;
 
 	public AeroplaneChess build() {
