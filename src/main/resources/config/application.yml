@@ -10,6 +10,12 @@ server:
     'tracking-modes': cookie
 
 websocket:
+  destination:
+    prefix:
+      broker: /game
+      application: /app
+  stomp:
+    endpoint: /aeroplanechess-websocket
   gameroom:
     config:
       numof:
