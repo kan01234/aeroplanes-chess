@@ -42,7 +42,7 @@ public class GameRepository<T extends Game> {
 	public T removePlayingGame(String gameId) {
 		T t = playingGameMap.remove(gameId);
 		if (t != null)
-			playerRepository.removePlayer(Stream.of(t.getPlayers()).map(p -> p.getSessionId()).collect(Collectors.toList()));
+			playerRepository.removePlayer(Stream.of(t.getPlayers()).filter(p -> p != null).map(p -> p.getSessionId()).collect(Collectors.toList()));
 		return t;
 	}
 
