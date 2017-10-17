@@ -7,7 +7,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-import com.dotterbear.aeroplanechess.service.PlayerService;
+import com.dotterbear.websocket.gameroom.service.PlayerService;
 
 @Component
 public class StompDisconnectedEventListener implements ApplicationListener<SessionDisconnectEvent> {

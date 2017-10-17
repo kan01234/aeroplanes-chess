@@ -2,6 +2,8 @@ package com.dotterbear.aeroplanechess.model;
 
 import java.util.Arrays;
 
+import com.dotterbear.websocket.gameroom.model.Game;
+
 public class AeroplaneChess extends Game {
 
 	int lastRoll = -1;

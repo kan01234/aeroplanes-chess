@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 import com.dotterbear.aeroplanechess.builder.AeroplaneChessBuilder;
 import com.dotterbear.aeroplanechess.model.Aeroplane;
 import com.dotterbear.aeroplanechess.model.AeroplaneChess;
-import com.dotterbear.aeroplanechess.model.Player;
-import com.dotterbear.aeroplanechess.repository.GameRepository;
-import com.dotterbear.aeroplanechess.service.AbstractWebSocketService;
-import com.dotterbear.aeroplanechess.service.GameService;
 import com.dotterbear.aeroplanechess.utils.GameUtils;
+import com.dotterbear.websocket.gameroom.model.Player;
+import com.dotterbear.websocket.gameroom.repository.GameRepository;
+import com.dotterbear.websocket.gameroom.service.AbstractWebSocketService;
+import com.dotterbear.websocket.gameroom.service.GameService;
 
 @Service
 public class GameServiceImpl extends AbstractWebSocketService implements GameService<AeroplaneChess> {

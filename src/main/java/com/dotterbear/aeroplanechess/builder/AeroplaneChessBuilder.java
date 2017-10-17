@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.dotterbear.aeroplanechess.model.Aeroplane;
 import com.dotterbear.aeroplanechess.model.AeroplaneChess;
+import com.dotterbear.websocket.gameroom.builder.AbstractGameBuilder;
 
 public class AeroplaneChessBuilder extends AbstractGameBuilder<AeroplaneChess> {
 
