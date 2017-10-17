@@ -67,7 +67,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>com.aeroplanechess.App</mainClass>
+					<mainClass>com.dotterbear.aeroplanechess.App</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
