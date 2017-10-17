@@ -32,5 +32,5 @@ mvn spring boot:run
 ### TODO
 - [x] draw shortcut line on the board
 - [x] change turn continued field to support multi-thread
-- [ ] move player service and other room logic to another project
+- [x] move player service and other room logic to another project
 - [ ] plan anything else
