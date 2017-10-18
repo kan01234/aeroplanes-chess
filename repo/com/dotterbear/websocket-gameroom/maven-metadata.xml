@@ -3,10 +3,10 @@
   <groupId>com.dotterbear</groupId>
   <artifactId>websocket-gameroom</artifactId>
   <versioning>
-    <release>1.1-rc</release>
+    <release>1.2-rc</release>
     <versions>
-      <version>1.1-rc</version>
+      <version>1.2-rc</version>
     </versions>
-    <lastUpdated>20171018024541</lastUpdated>
+    <lastUpdated>20171018041242</lastUpdated>
   </versioning>
 </metadata>

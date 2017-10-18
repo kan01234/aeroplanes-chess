@@ -2,9 +2,9 @@ package com.dotterbear.aeroplanechess.model;
 
 import java.util.Arrays;
 
-import com.dotterbear.websocket.gameroom.model.Game;
+import com.dotterbear.websocket.gameroom.model.AbstractGame;
 
-public class AeroplaneChess extends Game {
+public class AeroplaneChess extends AbstractGame {
 
 	int lastRoll = -1;
 	int continued = 0;
