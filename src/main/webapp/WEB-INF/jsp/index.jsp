@@ -10,7 +10,7 @@
 	<div class="wrapper-header">
 		<h1 id="title">Aeroplane Chess</h1>
 	</div>
-	<div id="game-id"></div>
+	<div id="game-id"><img src="image/ic_link_white_24dp/web/ic_link_white_24dp_1x.png"><span id="game-id-span"></span></div>
 	<input id="game-id-hidden">
 	<img id="game-chess-hidden-1" src="image/aeroplanes1.png">
 	<img id="game-chess-hidden-2" src="image/aeroplanes2.png">
@@ -92,8 +92,10 @@
 			</div>
 			<ol class="rule">
 				<li>Roll 2, 4, 6 can move one of the plane from base to take off point</li>
-				<li>If destination of the move has more than two planes, moved plane back to the base</li>
+				<li>Can send back opposing plane after jump</li>
+				<li>if destination of the move has more than two opposing planes, moved plane back to the base</li>
 				<li>Roll 6 can continue the turn, however if the third roll is 6, all of the plane of that player need to back to the base</li>
+				<li>An additional shortcut when the plane land exactly on that cell, but it will not send back opposing planes on the lane</li>
 				<li>Have fun!</li>
 			</ol>
 		</div>
@@ -102,6 +104,13 @@
 </body>
 <script>
 	var gameId = "${gameId}";
+</script>
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+	(adsbygoogle = window.adsbygoogle || []).push({
+		google_ad_client: "ca-pub-2935863720703520",
+		enable_page_level_ads: true
+	});
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
