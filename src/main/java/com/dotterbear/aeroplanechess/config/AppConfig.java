@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.dotterbear.aeroplanechess.builder.AeroplaneChessBuilder;
 import com.dotterbear.aeroplanechess.service.impl.GameServiceImpl;
+import com.dotterbear.aeroplanechess.utils.AeroplaneChessUtils;
 import com.dotterbear.aeroplanechess.utils.DiceUtils;
-import com.dotterbear.aeroplanechess.utils.GameUtils;
 import com.dotterbear.aeroplanechess.utils.MoveUtils;
 import com.dotterbear.websocket.gameroom.service.GameService;
 
@@ -25,8 +25,8 @@ public class AppConfig {
 	}
 
 	@Bean
-	public GameUtils getGameUtils() {
-		return new GameUtils();
+	public AeroplaneChessUtils getAeroplaneChessUtils() {
+		return new AeroplaneChessUtils();
 	}
 
 	@Bean

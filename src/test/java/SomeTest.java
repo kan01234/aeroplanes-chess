@@ -9,7 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.dotterbear.aeroplanechess.config.AppConfig;
-import com.dotterbear.aeroplanechess.utils.GameUtils;
+import com.dotterbear.aeroplanechess.utils.AeroplaneChessUtils;
 
 @SpringBootTest
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -17,7 +17,7 @@ import com.dotterbear.aeroplanechess.utils.GameUtils;
 public class SomeTest {
 
 	@Autowired
-	GameUtils gameUtils;
+	AeroplaneChessUtils aeroplaneChessUtils;
 
 	@Value(value = "${websocket.aeroplanechess.config.dice.min}")
 	int diceMin;
@@ -29,7 +29,7 @@ public class SomeTest {
 	public void roll() {
 		int roll;
 		for (int i = 0; i < 100; i++) {
-			roll = gameUtils.roll();
+			roll = aeroplaneChessUtils.roll();
 			assertTrue(roll >= diceMin && roll <= diceMax);
 		}
 	}

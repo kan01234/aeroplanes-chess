@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.dotterbear.aeroplanechess.enums.CellPrefix;
 import com.dotterbear.aeroplanechess.model.Aeroplane;
 
-public class GameUtils {
+public class AeroplaneChessUtils {
 
 	@Autowired
 	DiceUtils diceUtils;

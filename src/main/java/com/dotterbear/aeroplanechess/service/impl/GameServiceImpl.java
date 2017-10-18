@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.dotterbear.aeroplanechess.builder.AeroplaneChessBuilder;
 import com.dotterbear.aeroplanechess.model.Aeroplane;
 import com.dotterbear.aeroplanechess.model.AeroplaneChess;
-import com.dotterbear.aeroplanechess.utils.GameUtils;
+import com.dotterbear.aeroplanechess.utils.AeroplaneChessUtils;
 import com.dotterbear.websocket.gameroom.model.Player;
 import com.dotterbear.websocket.gameroom.repository.GameRepository;
 import com.dotterbear.websocket.gameroom.service.AbstractWebSocketService;
@@ -26,7 +26,7 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 	GameRepository<AeroplaneChess> gameRepository;
 
 	@Autowired
-	GameUtils gameUtils;
+	AeroplaneChessUtils aeroplaneChessUtils;
 
 	@Autowired
 	AeroplaneChessBuilder aeroplaneChessBuilder;
@@ -47,7 +47,7 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 		AeroplaneChess game = gameRepository.getPlayingGame(gameId);
 		if (game == null)
 			return;
-		int rollResult = gameUtils.roll();
+		int rollResult = aeroplaneChessUtils.roll();
 		// send roll result to all players
 		game.setLastRoll(rollResult);
 		send("roll-result", game.getId(), new String[] { "roll", "current" }, new Object[] { rollResult, game.getCurrentPlayerIndex() });
@@ -69,10 +69,10 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 		int currentPlayer = game.getCurrentPlayerIndex();
 		Aeroplane[] aeroplanes = game.getAeroplanes();
 		// move
-		List<Integer> encountered = gameUtils.move(aeroplanes, currentPlayer * numOfAeroplane + aeroplaneIndex, rollResult);
+		List<Integer> encountered = aeroplaneChessUtils.move(aeroplanes, currentPlayer * numOfAeroplane + aeroplaneIndex, rollResult);
 		send("move-result", gameId, new String[] { "aeroplanes", "encountered" }, new Object[] { aeroplanes, encountered });
 		// check win
-		if (gameUtils.isWin(aeroplanes, currentPlayer))
+		if (aeroplaneChessUtils.isWin(aeroplanes, currentPlayer))
 			playerWin(gameId, currentPlayer);
 		else
 			nextTurn(game, rollResult == diceMax);
@@ -80,7 +80,7 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 
 	void thridSix(AeroplaneChess game) {
 		logger.info("thridSix, game: " + game);
-		gameUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayerIndex());
+		aeroplaneChessUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayerIndex());
 		send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { game.getAeroplanes(), true });
 		nextTurn(game, false);
 	}
@@ -107,7 +107,7 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 
 	public void playerLeaved(AeroplaneChess game, int playerIndex) {
 		logger.info("playerLeaved, game: " + game + ", playerIndex: " + playerIndex);
-		gameUtils.allBackToBase(game.getAeroplanes(), playerIndex);
+		aeroplaneChessUtils.allBackToBase(game.getAeroplanes(), playerIndex);
 		send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), playerIndex });
 		if (playerIndex == game.getCurrentPlayerIndex())
 			nextTurn(game, false);
