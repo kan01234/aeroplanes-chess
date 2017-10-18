@@ -1,5 +1,5 @@
 # Aeroplanes Chess
-Aeroplane Chess game implement by Spring WebSocket. More about aeroplane chess can view this [link](https://en.wikipedia.org/wiki/Aeroplane_Chess). A online [demo](https://protected-dusk-59124.herokuapp.com/).
+Aeroplane Chess game implement by Spring WebSocket. More about aeroplane chess can view this [link](https://en.wikipedia.org/wiki/Aeroplane_Chess). A online [demo](https://aeroplane-chess.herokuapp.com/).
 
 ## Getting Started
 mvn spring boot:run
