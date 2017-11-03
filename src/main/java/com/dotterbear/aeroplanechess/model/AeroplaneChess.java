@@ -1,6 +1,7 @@
 package com.dotterbear.aeroplanechess.model;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dotterbear.websocket.gameroom.model.AbstractGame;
 
@@ -9,6 +10,7 @@ public class AeroplaneChess extends AbstractGame {
 	int lastRoll = -1;
 	int continued = 0;
 	Aeroplane[] aeroplanes;
+	AtomicInteger turnCount = new AtomicInteger(-1);
 
 	public int getLastRoll() {
 		return lastRoll;
@@ -32,6 +34,18 @@ public class AeroplaneChess extends AbstractGame {
 
 	public void setContinued(int continued) {
 		this.continued = continued;
+	}
+
+	public AtomicInteger getTurnCount() {
+		return turnCount;
+	}
+
+	public void setTurnCount(AtomicInteger turnCount) {
+		this.turnCount = turnCount;
+	}
+
+	public int getCurrentPlayerIndex() {
+		return turnCount.get() % players.length;
 	}
 
 	@Override
