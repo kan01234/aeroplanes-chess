@@ -54,10 +54,10 @@ body {
 }
 
 #game-id {
-	bottom: 5px;
-	color: #1520ffb3;
+	color: white;
 	left: 5px;
 	position: absolute;
+	top: 70px;
 }
 #game-id:hover {
 	cursor: pointer;
@@ -73,6 +73,10 @@ body {
 #game-chess-hidden-4 {
 	left: -999px;
 	position: absolute;
+}
+#game-id-span {
+	line-height: 26px;
+	vertical-align: top;
 }
 
 #background, #background-mask {

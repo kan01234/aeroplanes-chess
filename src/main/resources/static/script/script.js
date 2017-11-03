@@ -140,7 +140,7 @@ var join = (name) => {
 		stompClient.subscribe(`/game/joined-${sessionId}`, function(res) {
 			res = JSON.parse(res.body);
 			gameId = res["game-id"];
-			document.getElementById('game-id').innerHTML = `#${gameId}`;
+			document.getElementById('game-id-span').innerHTML = ` ${gameId}`;
 			document.getElementById('game-id-hidden').value = `${location.origin}#${gameId}`;
 			document.getElementById('game-id').addEventListener('click', () => {
 				console.log(gameId);
