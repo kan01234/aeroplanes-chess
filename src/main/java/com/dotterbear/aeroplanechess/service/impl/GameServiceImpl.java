@@ -47,16 +47,18 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 		AeroplaneChess game = gameRepository.getPlayingGame(gameId);
 		if (game == null)
 			return;
-		int rollResult = aeroplaneChessUtils.roll();
-		// send roll result to all players
-		game.setLastRoll(rollResult);
-		send("roll-result", game.getId(), new String[] { "roll", "current" }, new Object[] { rollResult, game.getCurrentPlayerIndex() });
+		synchronized (game) {
+			int rollResult = aeroplaneChessUtils.roll();
+			// send roll result to all players
+			game.setLastRoll(rollResult);
+			send("roll-result", game.getId(), new String[] { "roll", "current" }, new Object[] { rollResult, game.getCurrentPlayerIndex() });
 
-		// send move notification to current player
-		if (rollResult == 6 && game.getContinued() == 2) {
-			thridSix(game);
-		} else {
-			sendTo("move", sessionId, gameId, "move", true);
+			// send move notification to current player
+			if (rollResult == 6 && game.getContinued() == 2) {
+				thridSix(game);
+			} else {
+				sendTo("move", sessionId, gameId, "move", true);
+			}
 		}
 	}
 
@@ -65,17 +67,19 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 		AeroplaneChess game = gameRepository.getPlayingGame(gameId);
 		if (game == null)
 			return;
-		int rollResult = game.getLastRoll();
-		int currentPlayer = game.getCurrentPlayerIndex();
-		Aeroplane[] aeroplanes = game.getAeroplanes();
-		// move
-		List<Integer> encountered = aeroplaneChessUtils.move(aeroplanes, currentPlayer * numOfAeroplane + aeroplaneIndex, rollResult);
-		send("move-result", gameId, new String[] { "aeroplanes", "encountered" }, new Object[] { aeroplanes, encountered });
-		// check win
-		if (aeroplaneChessUtils.isWin(aeroplanes, currentPlayer))
-			playerWin(gameId, currentPlayer);
-		else
-			nextTurn(game, rollResult == diceMax);
+		synchronized (game) {
+			int rollResult = game.getLastRoll();
+			int currentPlayer = game.getCurrentPlayerIndex();
+			Aeroplane[] aeroplanes = game.getAeroplanes();
+			// move
+			List<Integer> encountered = aeroplaneChessUtils.move(aeroplanes, currentPlayer * numOfAeroplane + aeroplaneIndex, rollResult);
+			send("move-result", gameId, new String[] { "aeroplanes", "encountered" }, new Object[] { aeroplanes, encountered });
+			// check win
+			if (aeroplaneChessUtils.isWin(aeroplanes, currentPlayer))
+				playerWin(gameId, currentPlayer);
+			else
+				nextTurn(game, rollResult == diceMax);
+		}
 	}
 
 	void thridSix(AeroplaneChess game) {
