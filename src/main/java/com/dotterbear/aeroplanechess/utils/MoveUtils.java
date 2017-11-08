@@ -18,7 +18,6 @@ public class MoveUtils {
 	@Value(value = "${websocket.gameroom.config.numof.player}")
 	private int numOfPlayer;
 
-	// TODO make this method more readable
 	public List<Integer> move(Aeroplane[] aeroplanes, int aeroplaneIndex, int rollResult) {
 		Aeroplane aeroplane = aeroplanes[aeroplaneIndex];
 		int color = aeroplane.getColor();
@@ -26,29 +25,15 @@ public class MoveUtils {
 		String destPrefix = cellId.substring(0, 2);
 		int destNum = Integer.parseInt(cellId.substring(2));
 		List<Integer> encountered = new ArrayList<>();
-		int count = rollResult;
 
-		if (destPrefix.equals(CellPrefix.BASE.getPrefix())) {
-			toTakeOff(aeroplane, rollResult);
-			return encountered;
-		}
+		if (destPrefix.equals(CellPrefix.BASE.getPrefix()))
+			return fromBase(aeroplane, rollResult);
 
 		if (destPrefix.equals(CellPrefix.TAKEOFF.getPrefix())) {
 			destPrefix = CellPrefix.SKY.getPrefix();
 			destNum = (color * 13 + 3);
 			count--;
-		}
-
-		// walk
-		while (count > 0) {
-			if (destPrefix.equals(CellPrefix.SKY.getPrefix()) && isTurn(destNum, color)) {
-				destPrefix = CellPrefix.LANDING.getPrefix();
-				destNum = color * 5;
-			} else {
-				destNum += 1;
-				destNum %= MAX_NUMOF_CIRCLE;
-			}
-			count--;
+			return fromTakeOff();
 		}
 
 		// shortcut > jump
@@ -57,34 +42,20 @@ public class MoveUtils {
 			if (shortcutFrom == destNum) {
 				destNum += 12;
 				destNum %= MAX_NUMOF_CIRCLE;
-			} else if (!isTurn(destNum, color)) {
+			} else if (!isTurn(destPrefix, destNum, color)) {
 				destNum += numOfPlayer;
 				destNum %= MAX_NUMOF_CIRCLE;
 			}
 		}
 
-		for (int i = 0; i < color * numOfAeroplane; i++) {
-			if (aeroplanes[i].getInCellId().equals(destPrefix + destNum)) {
-				encountered.add(i);
-			}
-		}
-
-		for (int i = (color + 1) * numOfAeroplane; i < aeroplanes.length; i++) {
-			if (aeroplanes[i].getInCellId().equals(destPrefix + destNum)) {
-				encountered.add(i);
-			}
-		}
+		encountered = findEncountered(aeroplanes, destPrefix + destNum, color);
 
 		if (!encountered.isEmpty()) {
 			if (encountered.size() > 1) {
-				destPrefix = CellPrefix.BASE.getPrefix();
-				destNum = color;
-			} else {
-				int i = encountered.get(0);
-				Aeroplane a = aeroplanes[i];
-				a.setInCellId(CellPrefix.BASE.getPrefix() + a.getColor());
-				aeroplanes[i] = a;
-			}
+				backToBase(aeroplane);
+				return encountered;
+			} else
+				backToBase(aeroplanes[encountered.get(0)]);
 		}
 
 		// to goal
@@ -98,28 +69,74 @@ public class MoveUtils {
 		}
 
 		aeroplane.setInCellId(destPrefix + destNum);
-		aeroplanes[aeroplaneIndex] = aeroplane;
 		return encountered;
 
 	}
 
-	private void toTakeOff(Aeroplane aeroplane, int rollResult) {
+	private ArrayList<Integer> fromBase(Aeroplane aeroplane, int rollResult) {
 		if (rollResult % 2 == 0)
 			aeroplane.setInCellId(CellPrefix.TAKEOFF.getPrefix() + aeroplane.getColor());
+		return new ArrayList<Integer>();
+	}
+
+	private ArrayList<Integer> fromTakeOff(Aeroplane[] aeroplanes, Aeroplane aeroplane, int rollResult) {
+		if (destPrefix.equals(CellPrefix.TAKEOFF.getPrefix())) {
+			destPrefix = CellPrefix.SKY.getPrefix();
+			destNum = (color * 13 + 3);
+			return fromTakeOff();
+		}
+		walk(aeroplane, rollResult);
+	}
+
+	private String walk(Aeroplane aeroplane, int rollResult) {
+		String destPrefix = aeroplane.getInCellId().substring(0, 2);
+		int destNum = Integer.parseInt(aeroplane.getInCellId().substring(2));
+		int color = aeroplane.getColor();
+		// walk
+		for (int i = 0; i < rollResult; i++) {
+			if (isTurn(destPrefix, destNum, color)) {
+				destPrefix = CellPrefix.LANDING.getPrefix();
+				destNum = color * 5;
+			} else {
+				destNum += 1;
+				destNum %= MAX_NUMOF_CIRCLE;
+			}
+		}
+		return destPrefix + destNum;
+	}
+
+	private List<Integer> findEncountered(Aeroplane[] aeroplanes, String cellId, int color) {
+		List<Integer> result = new ArrayList<>();
+		for (int i = 0; i < color * numOfAeroplane; i++) {
+			if (aeroplanes[i].getInCellId().equals(cellId)) {
+				result.add(i);
+			}
+		}
+
+		for (int i = (color + 1) * numOfAeroplane; i < aeroplanes.length; i++) {
+			if (aeroplanes[i].getInCellId().equals(cellId)) {
+				result.add(i);
+			}
+		}
+		return result;
 	}
 
 	private int getShortcutFrom(int color) {
 		return ((color + 1) * 13 + 7) % 52;
 	}
 
-	private boolean isTurn(int cellNum, int color) {
-		return cellNum == color * 13;
+	private boolean isTurn(String destPrefix, int cellNum, int color) {
+		return destPrefix.equals(CellPrefix.SKY.getPrefix()) && cellNum == color * 13;
+	}
+
+	private void backToBase(Aeroplane aeroplane) {
+		aeroplane.setInCellId(CellPrefix.BASE.getPrefix() + aeroplane.getColor());
 	}
 
 	public void allBackToBase(Aeroplane[] aeroplanes, int playerIndex) {
 		int start = playerIndex * numOfAeroplane;
 		for (int i = start; i < start + numOfAeroplane; i++)
-			aeroplanes[i].setInCellId(CellPrefix.BASE.getPrefix() + playerIndex);
+			backToBase(aeroplanes[i]);
 	}
 
 }
