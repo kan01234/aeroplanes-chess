@@ -2,8 +2,8 @@ package com.dotterbear.aeroplanechess.model;
 
 public class Aeroplane {
 
-	int color;
-	String inCellId;
+	private int color;
+	private String inCellId;
 
 	public Aeroplane() {
 	}

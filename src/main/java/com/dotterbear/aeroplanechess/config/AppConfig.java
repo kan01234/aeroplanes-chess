@@ -30,7 +30,7 @@ public class AppConfig {
 	}
 
 	@Bean
-	public GameService<?> getGameService() {
+	public GameService getGameService() {
 		return new GameServiceImpl();
 	}
 

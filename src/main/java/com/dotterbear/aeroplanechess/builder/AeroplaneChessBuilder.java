@@ -9,7 +9,7 @@ import com.dotterbear.websocket.gameroom.builder.AbstractGameBuilder;
 public class AeroplaneChessBuilder extends AbstractGameBuilder<AeroplaneChess> {
 
 	@Value(value = "${websocket.aeroplanechess.config.numof.aeroplane}")
-	int numOfAeroplane;
+	private int numOfAeroplane;
 
 	public AeroplaneChess build() {
 		AeroplaneChess aeroplaneChess = super.build(new AeroplaneChess());

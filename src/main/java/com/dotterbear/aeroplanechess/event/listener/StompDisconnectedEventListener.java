@@ -14,7 +14,7 @@ public class StompDisconnectedEventListener implements ApplicationListener<Sessi
 
 	@Autowired
 	@Lazy
-	PlayerService playerService;
+	private PlayerService playerService;
 
 	@Override
 	public void onApplicationEvent(SessionDisconnectEvent sessionDisconnectEvent) {

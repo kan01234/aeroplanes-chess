@@ -2,7 +2,7 @@ package com.dotterbear.aeroplanechess.enums;
 
 public enum CellPrefix {
 
-	Base("ba"), TakeOff("to"), Sky("sk"), Landing("ld"), Goal("go");
+	BASE("ba"), TAKEOFF("to"), SKY("sk"), LANDING("ld"), GOAL("go");
 
 	private String prefix;
 
@@ -12,10 +12,6 @@ public enum CellPrefix {
 
 	public String getPrefix() {
 		return prefix;
-	}
-
-	public void setPrefix(String prefix) {
-		this.prefix = prefix;
 	}
 
 }

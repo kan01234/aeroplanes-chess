@@ -4,8 +4,9 @@ import java.util.Random;
 
 public class DiceUtils {
 
-	Random random;
-	int min, max;
+	private Random random;
+	private int min;
+	private int max;
 
 	public DiceUtils() {
 	}

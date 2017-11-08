@@ -7,10 +7,10 @@ import com.dotterbear.websocket.gameroom.model.AbstractGame;
 
 public class AeroplaneChess extends AbstractGame {
 
-	int lastRoll = -1;
-	int continued = 0;
-	Aeroplane[] aeroplanes;
-	AtomicInteger turnCount = new AtomicInteger(-1);
+	private int lastRoll = -1;
+	private int continued = 0;
+	private Aeroplane[] aeroplanes;
+	private AtomicInteger turnCount = new AtomicInteger(-1);
 
 	public int getLastRoll() {
 		return lastRoll;

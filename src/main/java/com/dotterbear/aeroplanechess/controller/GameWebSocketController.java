@@ -1,7 +1,5 @@
 package com.dotterbear.aeroplanechess.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
@@ -14,9 +12,7 @@ import com.dotterbear.aeroplanechess.service.impl.GameServiceImpl;
 public class GameWebSocketController {
 
 	@Autowired
-	GameServiceImpl gameService;
-
-	Logger logger = LoggerFactory.getLogger(GameWebSocketController.class);
+	private GameServiceImpl gameService;
 
 	@MessageMapping("/roll/{gameId}")
 	public void roll(@Header("simpSessionId") String sessionId, @DestinationVariable("gameId") String gameId) {

@@ -20,22 +20,22 @@ import com.dotterbear.websocket.gameroom.service.GameService;
 @Service
 public class GameServiceImpl extends AbstractWebSocketService implements GameService<AeroplaneChess> {
 
-	Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
+	private Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
 
 	@Autowired
-	GameRepository<AeroplaneChess> gameRepository;
+	private GameRepository<AeroplaneChess> gameRepository;
 
 	@Autowired
-	AeroplaneChessUtils aeroplaneChessUtils;
+	private AeroplaneChessUtils aeroplaneChessUtils;
 
 	@Autowired
-	AeroplaneChessBuilder aeroplaneChessBuilder;
+	private AeroplaneChessBuilder aeroplaneChessBuilder;
 
 	@Value(value = "${websocket.aeroplanechess.config.numof.aeroplane}")
-	int numOfAeroplane;
+	private int numOfAeroplane;
 
 	@Value(value = "${websocket.aeroplanechess.config.dice.max}")
-	int diceMax;
+	private int diceMax;
 
 	public void start(String gameId) {
 		send("start", gameId, "start", true);
@@ -43,7 +43,7 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 	}
 
 	public void roll(String sessionId, String gameId) {
-		logger.info("roll, sessionId: " + sessionId + ", gameId: " + gameId);
+		logger.info("roll, sessionId: ", sessionId, ", gameId: ", gameId);
 		AeroplaneChess game = gameRepository.getPlayingGame(gameId);
 		if (game == null)
 			return;
@@ -63,7 +63,7 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 	}
 
 	public void move(String sessionId, String gameId, int aeroplaneIndex) {
-		logger.info("move, sessionId: " + sessionId + ", gameId: " + gameId + ", aeroplaneIndex: " + aeroplaneIndex);
+		logger.info("move, sessionId: ", sessionId, ", gameId: ", gameId, ", aeroplaneIndex: ", aeroplaneIndex);
 		AeroplaneChess game = gameRepository.getPlayingGame(gameId);
 		if (game == null)
 			return;
@@ -73,7 +73,7 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 			Aeroplane[] aeroplanes = game.getAeroplanes();
 			// move
 			List<Integer> encountered = aeroplaneChessUtils.move(aeroplanes, currentPlayer * numOfAeroplane + aeroplaneIndex, rollResult);
-			send("move-result", gameId, new String[] { "aeroplanes", "encountered" }, new Object[] { aeroplanes, encountered });
+			sendMoveResult(game.getId(), aeroplanes, "encountered", encountered);
 			// check win
 			if (aeroplaneChessUtils.isWin(aeroplanes, currentPlayer))
 				playerWin(gameId, currentPlayer);
@@ -82,15 +82,15 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 		}
 	}
 
-	void thridSix(AeroplaneChess game) {
-		logger.info("thridSix, game: " + game);
+	private void thridSix(AeroplaneChess game) {
+		logger.info("thridSix, game: ", game);
 		aeroplaneChessUtils.allBackToBase(game.getAeroplanes(), game.getCurrentPlayerIndex());
-		send("move-result", game.getId(), new String[] { "aeroplanes", "thrid-six" }, new Object[] { game.getAeroplanes(), true });
+		sendMoveResult(game.getId(), game.getAeroplanes(), "thrid-six", true);
 		nextTurn(game, false);
 	}
 
-	void nextTurn(AeroplaneChess game, boolean isContinue) {
-		logger.info("nextTurn, game:" + game + ", isContinue: " + isContinue);
+	private void nextTurn(AeroplaneChess game, boolean isContinue) {
+		logger.info("nextTurn, game:", game, ", isContinue: ", isContinue);
 		if (isContinue)
 			game.setContinued(game.getContinued() + 1);
 		else {
@@ -104,15 +104,15 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 	}
 
 	public void playerWin(String gameId, int playerIndex) {
-		logger.info("playerWin, gameId: " + gameId + ", playerIndex: " + playerIndex);
+		logger.info("playerWin, gameId: ", gameId, ", playerIndex: ", playerIndex);
 		gameRepository.removePlayingGame(gameId);
 		send("won", gameId, "player-won", playerIndex);
 	}
 
 	public void playerLeaved(AeroplaneChess game, int playerIndex) {
-		logger.info("playerLeaved, game: " + game + ", playerIndex: " + playerIndex);
+		logger.info("playerLeaved, game: ", game, ", playerIndex: ", playerIndex);
 		aeroplaneChessUtils.allBackToBase(game.getAeroplanes(), playerIndex);
-		send("move-result", game.getId(), new String[] { "aeroplanes", "leaved" }, new Object[] { game.getAeroplanes(), playerIndex });
+		sendMoveResult(game.getId(), game.getAeroplanes(), "leaved", playerIndex);
 		if (playerIndex == game.getCurrentPlayerIndex())
 			nextTurn(game, false);
 	}
@@ -121,4 +121,7 @@ public class GameServiceImpl extends AbstractWebSocketService implements GameSer
 		return aeroplaneChessBuilder.build();
 	}
 
+	private void sendMoveResult(String gameId, Aeroplane[] aeroplanes, String key, Object value) {
+		send("move-result", gameId, new String[] { "aeroplanes", key }, new Object[] { aeroplanes, value });
+	}
 }
