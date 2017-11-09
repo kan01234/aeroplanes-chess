@@ -1,5 +1,5 @@
 # Aeroplanes Chess
-Aeroplane Chess game implement by Spring WebSocket. More about aeroplane chess can view this [link](https://en.wikipedia.org/wiki/Aeroplane_Chess). A online [demo](https://aeroplane-chess.herokuapp.com/).
+Aeroplane Chess game implement by Spring WebSocket and other [project](https://github.com/kan01234/websocket-gameroom). More about aeroplane chess can view this [link](https://en.wikipedia.org/wiki/Aeroplane_Chess). A online [demo](https://aeroplane-chess.herokuapp.com/).
 
 ## Getting Started
 mvn spring boot:run
@@ -29,8 +29,3 @@ mvn spring boot:run
 1. Plane must go into the center goal with exactly roll. The first player to finish all of the plane will win the game. And the game end
 2. You are the last player remaining in the playing game
 
-### TODO
-- [x] draw shortcut line on the board
-- [x] change turn continued field to support multi-thread
-- [x] move player service and other room logic to another project
-- [ ] plan anything else
